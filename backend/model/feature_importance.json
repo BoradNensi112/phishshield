@@ -1,0 +1,134 @@
+[
+    {
+        "feature": "max_char_repeat",
+        "importance": 12.251
+    },
+    {
+        "feature": "shannon_entropy",
+        "importance": 7.68
+    },
+    {
+        "feature": "digit_to_letter_ratio",
+        "importance": 7.253
+    },
+    {
+        "feature": "num_digits",
+        "importance": 6.97
+    },
+    {
+        "feature": "url_length",
+        "importance": 5.866
+    },
+    {
+        "feature": "path_length",
+        "importance": 5.808
+    },
+    {
+        "feature": "num_hyphens",
+        "importance": 5.782
+    },
+    {
+        "feature": "num_slashes",
+        "importance": 5.663
+    },
+    {
+        "feature": "domain_length",
+        "importance": 5.348
+    },
+    {
+        "feature": "count_subdomains",
+        "importance": 4.685
+    },
+    {
+        "feature": "has_sensitive_words_in_path",
+        "importance": 4.389
+    },
+    {
+        "feature": "num_dots",
+        "importance": 4.321
+    },
+    {
+        "feature": "vowel_ratio_domain",
+        "importance": 4.112
+    },
+    {
+        "feature": "count_vowels_in_domain",
+        "importance": 3.407
+    },
+    {
+        "feature": "count_consonants_in_domain",
+        "importance": 3.292
+    },
+    {
+        "feature": "tld_length",
+        "importance": 2.432
+    },
+    {
+        "feature": "query_length",
+        "importance": 1.779
+    },
+    {
+        "feature": "num_underscores",
+        "importance": 1.767
+    },
+    {
+        "feature": "num_question_marks",
+        "importance": 1.73
+    },
+    {
+        "feature": "has_https",
+        "importance": 1.268
+    },
+    {
+        "feature": "num_equals",
+        "importance": 1.248
+    },
+    {
+        "feature": "brand_spoofing_keyword",
+        "importance": 1.206
+    },
+    {
+        "feature": "num_percent",
+        "importance": 0.445
+    },
+    {
+        "feature": "num_special_chars",
+        "importance": 0.383
+    },
+    {
+        "feature": "is_domain_length_abnormal",
+        "importance": 0.331
+    },
+    {
+        "feature": "num_at_symbol",
+        "importance": 0.19
+    },
+    {
+        "feature": "suspicious_tld_flag",
+        "importance": 0.168
+    },
+    {
+        "feature": "has_port_number",
+        "importance": 0.09
+    },
+    {
+        "feature": "is_url_shortened",
+        "importance": 0.054
+    },
+    {
+        "feature": "is_ip_address",
+        "importance": 0.033
+    },
+    {
+        "feature": "has_double_slash_redirect",
+        "importance": 0.024
+    },
+    {
+        "feature": "consecutive_hyphens_count",
+        "importance": 0.019
+    },
+    {
+        "feature": "homograph_punycode_flag",
+        "importance": 0.005
+    }
+]

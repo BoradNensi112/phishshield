@@ -1,0 +1,191 @@
+/* ===================================================================
+   PHISHSHIELD - DESIGN SYSTEM (DARK & LIGHT CYBER THEMES)
+   =================================================================== */
+
+:root, [data-theme="dark"] {
+  --bg-base: #070b14;
+  --bg-surface: #0e1526;
+  --bg-card: rgba(15, 23, 42, 0.72);
+  --bg-card-hover: rgba(22, 33, 58, 0.85);
+  --bg-input: rgba(10, 16, 30, 0.85);
+  --border-color: rgba(0, 240, 255, 0.16);
+  --border-glow: 0 0 20px rgba(0, 240, 255, 0.15);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --cyan: #00f0ff;
+  --cyan-hover: #38bdf8;
+  --cyan-subtle: rgba(0, 240, 255, 0.1);
+  --green-safe: #10b981;
+  --green-bg: rgba(16, 185, 129, 0.15);
+  --red-threat: #f43f5e;
+  --red-bg: rgba(244, 63, 94, 0.15);
+  --amber-warn: #f59e0b;
+  --amber-bg: rgba(245, 158, 11, 0.15);
+  --nav-bg: rgba(7, 11, 20, 0.85);
+  --footer-bg: #050810;
+  --shadow-main: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+  --terminal-bg: #050811;
+}
+
+[data-theme="light"] {
+  --bg-base: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-hover: rgba(248, 250, 252, 1);
+  --bg-input: #f8fafc;
+  --border-color: rgba(2, 132, 199, 0.22);
+  --border-glow: 0 4px 20px rgba(2, 132, 199, 0.1);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --cyan: #0284c7;
+  --cyan-hover: #0369a1;
+  --cyan-subtle: rgba(2, 132, 199, 0.1);
+  --green-safe: #16a34a;
+  --green-bg: rgba(22, 163, 74, 0.12);
+  --red-threat: #e11d48;
+  --red-bg: rgba(225, 29, 72, 0.12);
+  --amber-warn: #d97706;
+  --amber-bg: rgba(217, 119, 6, 0.12);
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --footer-bg: #e2e8f0;
+  --shadow-main: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+  --terminal-bg: #1e293b;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, h4, .brand-title, .nav-logo {
+  font-family: 'Poppins', sans-serif;
+}
+
+code, pre, .mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Card Utility */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-main);
+  padding: 24px;
+}
+
+.glass-card:hover {
+  border-color: var(--cyan);
+  box-shadow: var(--border-glow);
+}
+
+/* Cyber Button Styles */
+.cyber-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--cyan), #0284c7);
+  color: #070b14;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 240, 255, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  text-decoration: none;
+}
+
+.cyber-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+  opacity: 0.95;
+}
+
+.cyber-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.cyber-btn-secondary:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: translateY(-2px);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.badge-safe {
+  background: var(--green-bg);
+  color: var(--green-safe);
+  border: 1px solid var(--green-safe);
+}
+
+.badge-phish {
+  background: var(--red-bg);
+  color: var(--red-threat);
+  border: 1px solid var(--red-threat);
+}
+
+.badge-warn {
+  background: var(--amber-bg);
+  color: var(--amber-warn);
+  border: 1px solid var(--amber-warn);
+}
+
+.badge-cyan {
+  background: var(--cyan-subtle);
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+}
+
+/* App Container */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 80px; /* offset fixed navbar */
+}

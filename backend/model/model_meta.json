@@ -1,0 +1,73 @@
+{
+    "model_name": "Random Forest Classifier",
+    "n_estimators": 150,
+    "max_depth": 16,
+    "features_count": 33,
+    "dataset_total_samples": 11429,
+    "train_samples": 9143,
+    "test_samples": 2286,
+    "accuracy": 88.67,
+    "precision": 88.04,
+    "recall": 89.5,
+    "f1_score": 88.76,
+    "roc_auc": 0.9584,
+    "confusion_matrix": {
+        "true_negative": 1004,
+        "false_positive": 139,
+        "false_negative": 120,
+        "true_positive": 1023
+    },
+    "top_features": [
+        {
+            "rank": 1,
+            "feature": "max_char_repeat",
+            "importance": 12.25
+        },
+        {
+            "rank": 2,
+            "feature": "shannon_entropy",
+            "importance": 7.68
+        },
+        {
+            "rank": 3,
+            "feature": "digit_to_letter_ratio",
+            "importance": 7.25
+        },
+        {
+            "rank": 4,
+            "feature": "num_digits",
+            "importance": 6.97
+        },
+        {
+            "rank": 5,
+            "feature": "url_length",
+            "importance": 5.87
+        },
+        {
+            "rank": 6,
+            "feature": "path_length",
+            "importance": 5.81
+        },
+        {
+            "rank": 7,
+            "feature": "num_hyphens",
+            "importance": 5.78
+        },
+        {
+            "rank": 8,
+            "feature": "num_slashes",
+            "importance": 5.66
+        },
+        {
+            "rank": 9,
+            "feature": "domain_length",
+            "importance": 5.35
+        },
+        {
+            "rank": 10,
+            "feature": "count_subdomains",
+            "importance": 4.69
+        }
+    ],
+    "training_time_seconds": 6.44
+}
