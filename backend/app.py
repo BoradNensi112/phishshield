@@ -205,6 +205,23 @@ def predict_url(req: PredictRequest):
         features=feats
     )
 
+# API Aliases (/api/...)
+@app.get("/api/health")
+def api_health_check():
+    return health_check()
+
+@app.get("/api/model-info")
+def api_get_model_info():
+    return get_model_info()
+
+@app.get("/api/feature-importance")
+def api_get_feature_importance():
+    return get_feature_importance()
+
+@app.post("/api/predict", response_model=PredictResponse)
+def api_predict_url(req: PredictRequest):
+    return predict_url(req)
+
 # Serve Frontend SPA in Production if built
 FRONTEND_DIST = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend", "dist"))
 if not os.path.exists(FRONTEND_DIST):
@@ -217,13 +234,21 @@ if os.path.exists(FRONTEND_DIST):
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        # Exclude existing API routes & Swagger docs
-        if full_path in ["health", "model-info", "feature-importance", "predict", "docs", "openapi.json"]:
-            raise HTTPException(status_code=404, detail="Not found")
-        file_path = os.path.join(FRONTEND_DIST, full_path)
-        if os.path.isfile(file_path):
+        clean_path = (full_path or "").strip("/")
+        if clean_path in ["health", "api/health"]:
+            return health_check()
+        if clean_path in ["model-info", "api/model-info"]:
+            return get_model_info()
+        if clean_path in ["feature-importance", "api/feature-importance"]:
+            return get_feature_importance()
+        
+        file_path = os.path.join(FRONTEND_DIST, clean_path)
+        if clean_path and os.path.isfile(file_path):
             return FileResponse(file_path)
-        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+        raise HTTPException(status_code=404, detail="Resource not found")
 
 if __name__ == "__main__":
     import uvicorn
