@@ -222,6 +222,146 @@ def api_get_feature_importance():
 def api_predict_url(req: PredictRequest):
     return predict_url(req)
 
+# ==========================================
+# AUTHENTICATION & SOC ANALYST ACCESS SYSTEM
+# ==========================================
+import hashlib
+import secrets
+
+DATA_DIR = os.path.join(BASE_DIR, "data")
+USERS_FILE = os.path.join(DATA_DIR, "users.json")
+
+def _hash_password(password: str, salt: str) -> str:
+    return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
+
+def _load_users() -> dict:
+    os.makedirs(DATA_DIR, exist_ok=True)
+    if not os.path.exists(USERS_FILE):
+        # Seed default demo analyst accounts for presentations & viva examiners
+        salt1 = secrets.token_hex(8)
+        salt2 = secrets.token_hex(8)
+        initial_users = {
+            "analyst@phishshield.com": {
+                "id": "usr_analyst_01",
+                "name": "Nensi Borad",
+                "email": "analyst@phishshield.com",
+                "role": "Lead SOC Analyst",
+                "salt": salt1,
+                "hashed_password": _hash_password("analyst123", salt1),
+                "created_at": "2026-01-01T00:00:00Z"
+            },
+            "admin@phishshield.com": {
+                "id": "usr_admin_01",
+                "name": "Security Operations Center Admin",
+                "email": "admin@phishshield.com",
+                "role": "Threat Intelligence Lead",
+                "salt": salt2,
+                "hashed_password": _hash_password("admin123", salt2),
+                "created_at": "2026-01-01T00:00:00Z"
+            }
+        }
+        with open(USERS_FILE, "w", encoding="utf-8") as f:
+            json.dump(initial_users, f, indent=2)
+        return initial_users
+    try:
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _save_users(users: dict):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(users, f, indent=2)
+
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str = "SOC Security Analyst"
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/auth/register")
+@app.post("/api/auth/register")
+def register_user(req: RegisterRequest):
+    email = (req.email or "").strip().lower()
+    name = (req.name or "").strip()
+    password = req.password or ""
+    role = (req.role or "SOC Security Analyst").strip()
+
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="A valid analyst email address is required.")
+    if len(name) < 2:
+        raise HTTPException(status_code=400, detail="Analyst name must be at least 2 characters long.")
+    if len(password) < 6:
+        raise HTTPException(status_code=400, detail="Security password must be at least 6 characters.")
+
+    users = _load_users()
+    if email in users:
+        raise HTTPException(status_code=400, detail="Analyst profile with this email already exists.")
+
+    salt = secrets.token_hex(8)
+    user_id = f"usr_{secrets.token_hex(4)}"
+    new_user = {
+        "id": user_id,
+        "name": name,
+        "email": email,
+        "role": role,
+        "salt": salt,
+        "hashed_password": _hash_password(password, salt),
+        "created_at": "2026-03-09T00:00:00Z"
+    }
+    users[email] = new_user
+    _save_users(users)
+
+    token = f"token_{secrets.token_hex(16)}"
+    return {
+        "success": True,
+        "message": "Analyst account registered successfully",
+        "user": {
+            "id": user_id,
+            "name": name,
+            "email": email,
+            "role": role
+        },
+        "token": token
+    }
+
+@app.post("/auth/login")
+@app.post("/api/auth/login")
+def login_user(req: LoginRequest):
+    email = (req.email or "").strip().lower()
+    password = req.password or ""
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password are required.")
+
+    users = _load_users()
+    user = users.get(email)
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid analyst credentials or account not found.")
+
+    salt = user.get("salt", "")
+    if _hash_password(password, salt) != user.get("hashed_password"):
+        raise HTTPException(status_code=401, detail="Incorrect password. Access denied.")
+
+    token = f"token_{secrets.token_hex(16)}"
+    return {
+        "success": True,
+        "message": "Authentication successful",
+        "user": {
+            "id": user.get("id"),
+            "name": user.get("name"),
+            "email": user.get("email"),
+            "role": user.get("role", "SOC Security Analyst")
+        },
+        "token": token
+    }
+
 # Serve Frontend SPA in Production if built
 FRONTEND_DIST = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend", "dist"))
 if not os.path.exists(FRONTEND_DIST):

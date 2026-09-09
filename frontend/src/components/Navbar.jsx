@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Shield, ShieldAlert, Sun, Moon, Activity, Radar, History, BarChart3, Info, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Shield, ShieldAlert, Sun, Moon, Activity, Radar, History, BarChart3, Info, Menu, X, LogIn, UserPlus, LogOut, User, CheckCircle2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import apiService from "../services/api";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
+  const { currentUser, isAuthenticated, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [apiOnline, setApiOnline] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -40,6 +43,11 @@ const Navbar = () => {
       document.body.style.overflow = "";
     };
   }, [mobileMenuOpen]);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const navLinks = [
     { path: "/", label: "Home", icon: <Shield size={18} /> },
@@ -82,6 +90,46 @@ const Navbar = () => {
           </div>
 
           <div className="nav-actions">
+            {/* Desktop Auth Controls */}
+            <div className="nav-auth-controls desktop-only">
+              {isAuthenticated ? (
+                <div className="nav-user-profile-badge">
+                  <div className="user-avatar-circle">
+                    <User size={15} />
+                  </div>
+                  <div className="user-info-text">
+                    <span className="user-display-name">{currentUser?.name || "Analyst"}</span>
+                    <span className="user-role-tag">{currentUser?.role || "SOC Analyst"}</span>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="nav-logout-btn"
+                    title="Log Out Terminal"
+                    aria-label="Log Out"
+                  >
+                    <LogOut size={15} />
+                  </button>
+                </div>
+              ) : (
+                <div className="nav-guest-actions">
+                  <Link
+                    to="/login"
+                    className={`nav-auth-btn login-btn ${location.pathname === "/login" ? "active" : ""}`}
+                  >
+                    <LogIn size={15} />
+                    <span>Sign In</span>
+                  </Link>
+                  <Link
+                    to="/register"
+                    className={`nav-auth-btn register-btn ${location.pathname === "/register" ? "active" : ""}`}
+                  >
+                    <UserPlus size={15} />
+                    <span>Register</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* API Health indicator (desktop only) */}
             <div className={`api-status-pill desktop-status-pill ${apiOnline ? "online" : "offline"}`} title={apiOnline ? "FastAPI Backend Connected" : "Connecting to Backend..."}>
               <span className="pulse-dot"></span>
@@ -127,6 +175,49 @@ const Navbar = () => {
               >
                 <X size={20} />
               </button>
+            </div>
+
+            {/* Mobile User Profile or Auth Buttons */}
+            <div className="mobile-drawer-auth-block">
+              {isAuthenticated ? (
+                <div className="mobile-user-card">
+                  <div className="mobile-user-header">
+                    <div className="user-avatar-circle">
+                      <User size={18} />
+                    </div>
+                    <div className="mobile-user-details">
+                      <span className="mobile-user-name">{currentUser?.name}</span>
+                      <span className="mobile-user-email">{currentUser?.email}</span>
+                    </div>
+                  </div>
+                  <div className="mobile-user-actions">
+                    <span className="mobile-user-badge">{currentUser?.role || "SOC Analyst"}</span>
+                    <button onClick={handleLogout} className="mobile-logout-btn">
+                      <LogOut size={14} />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mobile-auth-buttons">
+                  <Link
+                    to="/login"
+                    className="mobile-auth-btn mobile-login-btn"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn size={16} />
+                    <span>Sign In to Terminal</span>
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="mobile-auth-btn mobile-register-btn"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <UserPlus size={16} />
+                    <span>Register New Account</span>
+                  </Link>
+                </div>
+              )}
             </div>
 
             <div className="mobile-drawer-links">
