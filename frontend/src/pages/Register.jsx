@@ -47,7 +47,7 @@ const Register = () => {
     try {
       setIsSubmitting(true);
       await register(name, email, password, role);
-      navigate("/dashboard");
+      navigate("/scanner");
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {

@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Shield, Radar, Zap, Lock, Cpu, ArrowRight, BarChart3, CheckCircle, AlertTriangle } from "lucide-react";
+import { Shield, Radar, Zap, Lock, Cpu, ArrowRight, BarChart3, CheckCircle, AlertTriangle, UserPlus, LogIn, ShieldAlert } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
+  const { isAuthenticated, currentUser } = useAuth();
+
   return (
     <div className="home-page-container">
       {/* Hero Section */}
@@ -23,17 +26,38 @@ const Home = () => {
           <strong> Random Forest Classifier</strong> trained on 11,430 verified benchmark URLs.
         </p>
 
-        <div className="hero-cta-group">
-          <Link to="/scanner" className="cyber-btn-primary hero-btn">
-            <Radar size={20} />
-            <span>Scan URL Now</span>
-            <ArrowRight size={18} />
-          </Link>
-          <Link to="/dashboard" className="cyber-btn-secondary hero-btn">
-            <BarChart3 size={20} />
-            <span>Threat Dashboard</span>
-          </Link>
-        </div>
+        {/* Dynamic CTA Group based on Auth status */}
+        {isAuthenticated ? (
+          <div className="hero-cta-group">
+            <Link to="/scanner" className="cyber-btn-primary hero-btn">
+              <Radar size={20} />
+              <span>Scan URL Now</span>
+              <ArrowRight size={18} />
+            </Link>
+            <Link to="/dashboard" className="cyber-btn-secondary hero-btn">
+              <BarChart3 size={20} />
+              <span>Threat Dashboard</span>
+            </Link>
+          </div>
+        ) : (
+          <div className="hero-unauth-block">
+            <div className="hero-auth-lock-banner">
+              <ShieldAlert size={18} className="lock-banner-icon" />
+              <span>SOC Access Control: Register or Sign in to unlock the live URL Detection Engine.</span>
+            </div>
+            <div className="hero-cta-group">
+              <Link to="/register" className="cyber-btn-primary hero-btn">
+                <UserPlus size={20} />
+                <span>Register Analyst Terminal</span>
+                <ArrowRight size={18} />
+              </Link>
+              <Link to="/login" className="cyber-btn-secondary hero-btn">
+                <LogIn size={20} />
+                <span>Sign In to Terminal</span>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Animated Cyber Shield Illustration */}
         <div className="hero-radar-display">

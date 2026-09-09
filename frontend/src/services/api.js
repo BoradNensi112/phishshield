@@ -43,6 +43,11 @@ export const apiService = {
     return response.data;
   },
 
+  getScans: async () => {
+    const response = await apiClient.get("/scans");
+    return response.data;
+  },
+
   getConfusionMatrixUrl: () => `${API_BASE_URL || ""}/static/model/confusion_matrix.png`,
 };
 

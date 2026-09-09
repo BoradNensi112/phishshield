@@ -13,6 +13,7 @@ import ModelPerformance from "./pages/ModelPerformance";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import "./css/index.css";
 
@@ -26,13 +27,43 @@ function App() {
             <main className="main-content">
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/scanner" element={<Scanner />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/history" element={<ScanHistory />} />
-                <Route path="/model" element={<ModelPerformance />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+
+                {/* Authenticated Analyst Only Routes */}
+                <Route
+                  path="/scanner"
+                  element={
+                    <ProtectedRoute>
+                      <Scanner />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/history"
+                  element={
+                    <ProtectedRoute>
+                      <ScanHistory />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/model"
+                  element={
+                    <ProtectedRoute>
+                      <ModelPerformance />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </main>
             <Footer />

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Shield, Lock, Mail, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle2, Zap, ShieldCheck } from "lucide-react";
+import { Shield, Lock, Mail, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle2, Zap, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
@@ -14,7 +14,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const redirectPath = location.state?.from?.pathname || "/dashboard";
+  const redirectMessage = location.state?.message;
+  const redirectPath = location.state?.from?.pathname || "/scanner";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,6 +59,14 @@ const Login = () => {
               CYBER DEFENSE OPERATIONS // SECURE AUTHENTICATION
             </p>
           </div>
+
+          {/* Redirect Notice if user was redirected from a protected route */}
+          {redirectMessage && (
+            <div className="auth-notice-banner" role="status">
+              <ShieldAlert size={18} className="auth-notice-icon" />
+              <span>{redirectMessage}</span>
+            </div>
+          )}
 
           {/* Quick Demo Access banner (Super helpful for Viva/Examiner testing) */}
           <div className="demo-login-box">

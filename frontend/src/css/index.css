@@ -2817,6 +2817,55 @@
   flex-shrink: 0;
 }
 
+.auth-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+  padding: 10px 14px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  margin-bottom: 16px;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.auth-notice-icon {
+  flex-shrink: 0;
+  color: #f59e0b;
+}
+
+/* Home unauth block & lock banner */
+.hero-unauth-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.hero-auth-lock-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: var(--cyan);
+  font-size: 0.82rem;
+  font-weight: 600;
+  max-width: 90%;
+  text-align: center;
+}
+
+.lock-banner-icon {
+  flex-shrink: 0;
+  color: var(--cyan);
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;

@@ -193,6 +193,25 @@ def predict_url(req: PredictRequest):
     if prediction == "Phishing" and not reasons:
         reasons.append("Structural lexical anomalies detected by Random Forest model")
 
+    # Log scan result to server-side JSON storage
+    try:
+        import datetime
+        scan_log = {
+            "id": f"scan_{int(datetime.datetime.now().timestamp() * 1000)}",
+            "url": normalized_url,
+            "prediction": prediction,
+            "confidence": confidence,
+            "risk_score": risk_score,
+            "risk_level": risk_level,
+            "tier": tier,
+            "dns_status": dns_res.get("status", "Active"),
+            "timestamp": datetime.datetime.now().isoformat() + "Z",
+            "threat_count": len(reasons)
+        }
+        _log_scan(scan_log)
+    except Exception as e:
+        print(f"[-] Non-critical scan log error: {e}")
+
     return PredictResponse(
         url=normalized_url,
         prediction=prediction,
@@ -230,6 +249,35 @@ import secrets
 
 DATA_DIR = os.path.join(BASE_DIR, "data")
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
+SCANS_FILE = os.path.join(DATA_DIR, "scan_history.json")
+
+def _log_scan(scan_data: dict):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    scans = []
+    if os.path.exists(SCANS_FILE):
+        try:
+            with open(SCANS_FILE, "r", encoding="utf-8") as f:
+                scans = json.load(f)
+        except Exception:
+            scans = []
+    scans.insert(0, scan_data)
+    scans = scans[:200]
+    with open(SCANS_FILE, "w", encoding="utf-8") as f:
+        json.dump(scans, f, indent=2)
+
+def _load_scans() -> list:
+    if not os.path.exists(SCANS_FILE):
+        return []
+    try:
+        with open(SCANS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+@app.get("/scans")
+@app.get("/api/scans")
+def get_scans():
+    return _load_scans()
 
 def _hash_password(password: str, salt: str) -> str:
     return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
@@ -381,6 +429,8 @@ if os.path.exists(FRONTEND_DIST):
             return get_model_info()
         if clean_path in ["feature-importance", "api/feature-importance"]:
             return get_feature_importance()
+        if clean_path in ["scans", "api/scans"]:
+            return get_scans()
         
         file_path = os.path.join(FRONTEND_DIST, clean_path)
         if clean_path and os.path.isfile(file_path):
