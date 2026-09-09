@@ -114,7 +114,9 @@ const Login = () => {
                   placeholder="analyst@phishshield.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  style={{ backgroundColor: "#0e1526", color: "#f8fafc" }}
                   required
                 />
               </div>
@@ -136,6 +138,8 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
+                  data-lpignore="true"
+                  style={{ backgroundColor: "#0e1526", color: "#f8fafc" }}
                   required
                 />
                 <button

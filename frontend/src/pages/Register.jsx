@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Shield, Lock, Mail, User, Briefcase, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
+import { 
+  Shield, Lock, Mail, User, Briefcase, Eye, EyeOff, 
+  ArrowRight, AlertCircle, CheckCircle2, ChevronDown, Check 
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const ROLES = [
-  "SOC Security Analyst",
-  "Threat Intelligence Researcher",
-  "Cybersecurity Auditor",
-  "Incident Response Engineer",
+  { title: "SOC Security Analyst", desc: "Tier 1/2 Incident Detection & Monitoring" },
+  { title: "Threat Intelligence Researcher", desc: "Threat Actor & Campaign Attribution" },
+  { title: "Cybersecurity Auditor", desc: "Compliance, Forensics & Risk Inspection" },
+  { title: "Incident Response Engineer", desc: "Active Exploitation Containment & Mitigation" },
 ];
 
 const Register = () => {
@@ -16,12 +19,25 @@ const Register = () => {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState(ROLES[0]);
+  const [role, setRole] = useState(ROLES[0].title);
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setRoleDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +108,9 @@ const Register = () => {
                   placeholder="e.g. Nensi Borad"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  autoComplete="name"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  style={{ backgroundColor: "#0e1526", color: "#f8fafc" }}
                   required
                 />
               </div>
@@ -111,30 +129,65 @@ const Register = () => {
                   placeholder="analyst@domain.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  style={{ backgroundColor: "#0e1526", color: "#f8fafc" }}
                   required
                 />
               </div>
             </div>
 
-            <div className="auth-input-group">
-              <label htmlFor="reg-role" className="auth-label">
+            {/* Custom Cyber React Dropdown (Completely eliminates native Windows white OS popup) */}
+            <div className="auth-input-group" ref={dropdownRef}>
+              <label className="auth-label">
                 SOC Role & Privilege Level
               </label>
-              <div className="auth-input-wrapper">
-                <Briefcase className="auth-field-icon" size={18} />
-                <select
-                  id="reg-role"
-                  className="auth-input auth-select"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
+              <div className="custom-dropdown-container">
+                <button
+                  type="button"
+                  id="reg-role-trigger"
+                  className={`custom-dropdown-trigger ${roleDropdownOpen ? "open" : ""}`}
+                  onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                  aria-haspopup="listbox"
+                  aria-expanded={roleDropdownOpen}
                 >
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
+                  <div className="custom-dropdown-trigger-content">
+                    <Briefcase className="custom-dropdown-icon" size={18} />
+                    <span className="custom-dropdown-text">{role}</span>
+                  </div>
+                  <ChevronDown
+                    size={18}
+                    className={`custom-dropdown-arrow ${roleDropdownOpen ? "arrow-rotated" : ""}`}
+                  />
+                </button>
+
+                {roleDropdownOpen && (
+                  <div className="custom-dropdown-menu" role="listbox">
+                    {ROLES.map((r) => {
+                      const isSelected = role === r.title;
+                      return (
+                        <div
+                          key={r.title}
+                          className={`custom-dropdown-item ${isSelected ? "item-selected" : ""}`}
+                          onClick={() => {
+                            setRole(r.title);
+                            setRoleDropdownOpen(false);
+                          }}
+                          role="option"
+                          aria-selected={isSelected}
+                        >
+                          <div className="custom-dropdown-item-details">
+                            <span className="custom-dropdown-item-title">{r.title}</span>
+                            <span className="custom-dropdown-item-desc">{r.desc}</span>
+                          </div>
+                          {isSelected && (
+                            <Check size={16} className="custom-dropdown-check-icon" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -152,6 +205,8 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
+                  data-lpignore="true"
+                  style={{ backgroundColor: "#0e1526", color: "#f8fafc" }}
                   required
                 />
                 <button
@@ -179,6 +234,8 @@ const Register = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   autoComplete="new-password"
+                  data-lpignore="true"
+                  style={{ backgroundColor: "#0e1526", color: "#f8fafc" }}
                   required
                 />
               </div>
