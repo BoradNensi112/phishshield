@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from "recharts";
@@ -11,6 +11,13 @@ const ModelPerformance = () => {
   const [modelInfo, setModelInfo] = useState(null);
   const [featureImportances, setFeatureImportances] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth <= 640);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     fetchMetrics();
@@ -153,7 +160,7 @@ const ModelPerformance = () => {
             </div>
             <div className="spec-item">
               <span className="spec-label">Feature Vector Dimension:</span>
-              <span className="spec-val">30 URL-Only Numerical Features</span>
+              <span className="spec-val">33 URL-Only Numerical Features</span>
             </div>
             <div className="spec-item">
               <span className="spec-label">Training Speed:</span>
@@ -177,11 +184,11 @@ const ModelPerformance = () => {
             <BarChart
               data={featureImportances}
               layout="vertical"
-              margin={{ top: 10, right: 30, left: 130, bottom: 10 }}
+              margin={{ top: 10, right: isMobile ? 12 : 30, left: isMobile ? 85 : 130, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.4} />
-              <XAxis type="number" unit="%" stroke="var(--text-secondary)" />
-              <YAxis dataKey="feature" type="category" stroke="var(--text-secondary)" />
+              <XAxis type="number" unit="%" stroke="var(--text-secondary)" tick={{ fontSize: isMobile ? 10 : 12 }} />
+              <YAxis dataKey="feature" type="category" stroke="var(--text-secondary)" tick={{ fontSize: isMobile ? 9 : 12 }} width={isMobile ? 80 : 120} />
               <Tooltip 
                 formatter={(val) => [`${val}%`, "Weight"]}
                 contentStyle={{ 

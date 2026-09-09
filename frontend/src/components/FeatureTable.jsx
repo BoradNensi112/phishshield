@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Search, SlidersHorizontal, CheckCircle2, AlertTriangle, Layers } from "lucide-react";
 
 const FEATURE_CATEGORIES = {
@@ -32,6 +32,9 @@ const FEATURE_CATEGORIES = {
   count_vowels_in_domain: "Statistical",
   count_consonants_in_domain: "Statistical",
   has_sensitive_words_in_path: "Security",
+  max_char_repeat: "Statistical",
+  vowel_ratio_domain: "Statistical",
+  is_domain_length_abnormal: "Structural",
 };
 
 const FeatureTable = ({ features }) => {
@@ -62,7 +65,7 @@ const FeatureTable = ({ features }) => {
         <div className="feature-title-block">
           <Layers size={22} className="feature-icon-accent" />
           <div>
-            <h3>30-Feature Deep Neural Inspection</h3>
+            <h3>33-Feature Comprehensive Inspection</h3>
             <p>Lexical, structural & entropy characteristics extracted for ML evaluation</p>
           </div>
         </div>

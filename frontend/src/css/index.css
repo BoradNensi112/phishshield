@@ -125,6 +125,10 @@
   background: var(--bg-surface);
 }
 
+.desktop-status-pill {
+  display: flex;
+}
+
 .api-status-pill.online {
   border-color: var(--green-safe);
   color: var(--green-safe);
@@ -340,6 +344,10 @@
 .hero-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-wrap: wrap;
+  max-width: 95%;
   gap: 8px;
   padding: 6px 16px;
   background: var(--cyan-subtle);
@@ -350,6 +358,7 @@
   color: var(--cyan);
   margin-bottom: 24px;
   letter-spacing: 1px;
+  line-height: 1.4;
 }
 
 .pulsing-radar-dot {
@@ -1286,6 +1295,18 @@
 
 .chart-card {
   padding: 20px;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.chart-wrapper,
+.importance-chart-wrapper {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 .chart-header {
@@ -1844,10 +1865,12 @@
 @media (max-width: 860px) {
   /* Toggle Mobile Navbar */
   .desktop-only { display: none !important; }
+  .desktop-status-pill { display: none !important; }
   .mobile-menu-btn { display: flex !important; }
 
-  /* Navbar Spacing */
+  /* Navbar Spacing & Brand */
   .nav-container { padding: 0 16px; }
+  .brand-subtitle { display: none !important; }
 
   /* Layout grids drop to 1 column */
   .result-body-grid {
@@ -1864,14 +1887,17 @@
   /* Scanner result header wraps */
   .result-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 16px;
   }
   .result-actions {
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
   }
   .result-actions button {
-    width: 100%;
+    flex: 1;
     justify-content: center;
   }
 
@@ -1882,39 +1908,62 @@
   .history-page-container,
   .model-page-container,
   .about-page-container {
-    padding: 28px 16px 60px;
+    padding: 24px 16px 50px;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 
 /* 3. Phablets & Standard Mobile Phones (max-width: 640px) */
 @media (max-width: 640px) {
   /* Header & Navigation */
-  .cyber-navbar { height: 66px; }
-  .main-content { padding-top: 66px; }
+  .cyber-navbar { height: 64px; }
+  .main-content { padding-top: 64px; }
+  .nav-container { padding: 0 12px; }
+  .brand-title { font-size: 1.15rem; }
+  .logo-shield-wrapper { width: 36px; height: 36px; }
+  .theme-toggle-btn, .mobile-menu-btn { width: 36px; height: 36px; }
+  .nav-actions { gap: 8px; }
+
+  /* Global Cards */
+  .glass-card {
+    padding: 18px 14px;
+    border-radius: 14px;
+  }
 
   /* Typography */
-  .hero-title { font-size: 2rem; line-height: 1.25; }
-  .hero-description { font-size: 0.95rem; }
-  .page-header h2 { font-size: 1.8rem; }
-  .page-header p { font-size: 0.92rem; }
-  .section-heading h2 { font-size: 1.7rem; }
+  .hero-title { font-size: 1.85rem; line-height: 1.25; }
+  .hero-title br { display: none; }
+  .hero-description { font-size: 0.9rem; line-height: 1.6; }
+  .page-header h2 { font-size: 1.6rem; }
+  .page-header p { font-size: 0.88rem; }
+  .section-heading h2 { font-size: 1.5rem; }
+  .section-heading p { font-size: 0.88rem; }
 
   /* Hero Section */
-  .hero-section { padding: 24px 0 40px; }
+  .hero-section { padding: 20px 0 36px; }
+  .hero-badge {
+    font-size: 0.72rem;
+    padding: 6px 12px;
+    letter-spacing: 0.5px;
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
   .hero-cta-group {
     flex-direction: column;
     width: 100%;
-    gap: 12px;
+    gap: 10px;
   }
   .hero-btn {
     width: 100%;
     justify-content: center;
-    padding: 13px 20px;
-    font-size: 0.95rem;
+    padding: 12px 18px;
+    font-size: 0.92rem;
   }
   .hero-radar-display {
-    width: 220px;
-    height: 220px;
+    width: 210px;
+    height: 210px;
     margin: 20px auto 0;
   }
 
@@ -1922,19 +1971,27 @@
   .stats-banner {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 14px;
     text-align: center;
-    padding: 20px 16px;
+    padding: 18px 14px;
   }
+  .stat-box { min-width: 0; }
   .stat-divider { display: none; }
-  .stat-number { font-size: 1.8rem; }
-  .stat-label { font-size: 0.78rem; }
+  .stat-number { font-size: 1.65rem; }
+  .stat-label { font-size: 0.75rem; }
+
+  /* Features Grid (Home) */
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .feature-card { padding: 18px 16px; }
 
   /* Scanner Inputs */
-  .scanner-input-wrapper { padding: 16px; }
+  .scanner-input-wrapper { padding: 16px 14px; }
   .scanner-input {
-    font-size: 0.9rem;
-    padding: 13px 14px;
+    font-size: 0.88rem;
+    padding: 12px 14px;
   }
   .scanner-button-row {
     flex-direction: column;
@@ -1943,25 +2000,60 @@
   .scan-btn, .clear-btn {
     width: 100%;
     justify-content: center;
+    padding: 12px;
   }
-  .sample-presets { padding: 0 16px 16px; }
+  .sample-presets {
+    padding: 0 14px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .preset-chips {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .preset-chip {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+  .scanner-error-box {
+    margin: 0 14px 16px;
+    font-size: 0.82rem;
+  }
 
   /* Result Card & Gauge */
-  .verdict-text { font-size: 1.55rem; }
+  .verdict-text { font-size: 1.5rem; }
+  .result-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+  .result-actions button {
+    width: 100%;
+    justify-content: center;
+  }
   .scanned-url-display { padding: 10px 12px; }
-  .scanned-url-display .url-text { font-size: 0.85rem; }
+  .scanned-url-display .url-text { font-size: 0.82rem; }
   .dns-status-strip {
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: 8px;
     padding: 10px 12px;
   }
 
   /* Feature Table Controls */
+  .feature-drawer-card { padding: 18px 14px; }
   .feature-header {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+  }
+  .feature-filter-row {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
   }
   .filter-search-box {
     width: 100%;
@@ -1973,6 +2065,10 @@
     flex-wrap: wrap;
     gap: 6px;
   }
+  .cat-pill {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
 
   /* Dashboard KPIs & Flex Header */
   .flex-header {
@@ -1983,15 +2079,33 @@
   .flex-header button {
     align-self: flex-start;
   }
-  .kpi-card { padding: 16px; }
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .kpi-card {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+  .kpi-icon-wrapper {
+    width: 42px;
+    height: 42px;
+  }
+  .kpi-value { font-size: 1.5rem; }
+  .kpi-label { font-size: 0.75rem; }
   .chart-card { padding: 16px 12px; }
+  .chart-header h4 { font-size: 1.05rem; }
 
-  /* History Filters */
+  /* History Filters & Table */
   .history-filter-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
-    padding: 16px;
+    padding: 14px;
+  }
+  .history-search-input-box {
+    width: 100%;
+    min-width: unset;
   }
   .history-actions-row {
     width: 100%;
@@ -2006,41 +2120,54 @@
     flex-wrap: wrap;
     gap: 6px;
   }
+  .truncate-url-col {
+    max-width: 220px;
+  }
 
   /* Model Performance Page */
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .metric-card { padding: 14px 12px; }
+  .metric-value { font-size: 1.6rem; }
   .cm-breakdown-table {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
   .spec-item {
     padding: 8px 12px;
     font-size: 0.8rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
   }
 
   /* About Page */
   .dataset-stats-row {
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
+  }
+  .tech-stack-pills {
+    flex-direction: column;
+    gap: 8px;
   }
   .entropy-math-box {
-    padding: 14px 16px;
+    padding: 12px 14px;
   }
   .formula {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     word-break: break-all;
   }
 
   /* Footer */
   .footer-top {
     flex-direction: column;
-    gap: 24px;
-  }
-  .footer-links-group {
-    grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
   .footer-bottom {
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     text-align: center;
     align-items: center;
   }
@@ -2053,45 +2180,85 @@
 /* 4. Small Mobile Screens (max-width: 420px) */
 @media (max-width: 420px) {
   .nav-container { padding: 0 10px; }
-  .brand-title { font-size: 1.15rem; }
-  .brand-subtitle { display: none; }
-  
-  /* Compact API Status Pill */
-  .api-status-pill .status-label { display: none; }
-  .api-status-pill {
-    padding: 6px 8px;
-    gap: 0;
+  .brand-title { font-size: 1.05rem; }
+  .brand-subtitle { display: none !important; }
+  .logo-shield-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
   }
+  .theme-toggle-btn, .mobile-menu-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .nav-actions { gap: 6px; }
 
-  /* Hero radar compact */
+  /* Compact Hero */
+  .hero-title { font-size: 1.6rem; }
+  .hero-badge {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+  }
   .hero-radar-display {
-    width: 190px;
-    height: 190px;
+    width: 180px;
+    height: 180px;
   }
   .radar-shield-icon {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
   }
 
-  /* Stats Banner full single column */
+  /* Stats Banner, KPIs & Metrics full single column */
   .stats-banner {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
   }
-
-  /* Metric cards single column */
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
   .dataset-stats-row {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Cards & Spacing */
+  .glass-card {
+    padding: 14px 10px;
+    border-radius: 12px;
+  }
+  .home-page-container,
+  .scanner-page-container,
+  .dashboard-page-container,
+  .history-page-container,
+  .model-page-container,
+  .about-page-container {
+    padding: 16px 10px 40px;
   }
 
   /* Preset chips wrap tightly */
-  .preset-chips {
-    gap: 5px;
-  }
+  .preset-chips { gap: 4px; }
   .preset-chip {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     padding: 4px 8px;
   }
 
-  .verdict-text { font-size: 1.35rem; }
+  .verdict-text { font-size: 1.3rem; }
+}
+
+/* 5. Ultra-Compact Devices (max-width: 360px, e.g. Galaxy Fold outer / iPhone SE / 320px) */
+@media (max-width: 360px) {
+  .nav-container { padding: 0 8px; }
+  .brand-title { font-size: 0.95rem; }
+  .hero-title { font-size: 1.45rem; }
+  .hero-radar-display { width: 150px; height: 150px; }
+  .glass-card { padding: 12px 8px; }
+  .stat-number { font-size: 1.45rem; }
+  .kpi-value { font-size: 1.35rem; }
+  .metric-value { font-size: 1.45rem; }
+  .scan-btn, .clear-btn { font-size: 0.88rem; }
 }

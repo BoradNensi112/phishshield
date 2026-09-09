@@ -375,20 +375,20 @@ const Scanner = () => {
               </div>
             </div>
 
-            {/* Toggle 30 Features Button */}
+            {/* Toggle 33 Features Button */}
             <div className="feature-toggle-footer">
               <button
                 className="feature-toggle-btn"
                 onClick={() => setShowFeatures((prev) => !prev)}
               >
                 <Sliders size={18} />
-                <span>{showFeatures ? "Hide 30 Extracted URL Features" : "View 30 Extracted URL Features"}</span>
+                <span>{showFeatures ? "Hide 33 Extracted URL Features" : "View 33 Extracted URL Features"}</span>
                 {showFeatures ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </button>
             </div>
           </div>
 
-          {/* Collapsible 30 Features Table */}
+          {/* Collapsible 33 Features Table */}
           {showFeatures && <FeatureTable features={result.features} />}
         </div>
       )}

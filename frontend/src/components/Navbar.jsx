@@ -29,6 +29,18 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
   const navLinks = [
     { path: "/", label: "Home", icon: <Shield size={18} /> },
     { path: "/scanner", label: "URL Scanner", icon: <Radar size={18} /> },
@@ -70,8 +82,8 @@ const Navbar = () => {
           </div>
 
           <div className="nav-actions">
-            {/* API Health indicator */}
-            <div className={`api-status-pill ${apiOnline ? "online" : "offline"}`} title={apiOnline ? "FastAPI Backend Connected" : "Connecting to Backend..."}>
+            {/* API Health indicator (desktop only) */}
+            <div className={`api-status-pill desktop-status-pill ${apiOnline ? "online" : "offline"}`} title={apiOnline ? "FastAPI Backend Connected" : "Connecting to Backend..."}>
               <span className="pulse-dot"></span>
               <span className="status-label">{apiOnline ? "API Online" : "Connecting"}</span>
             </div>
