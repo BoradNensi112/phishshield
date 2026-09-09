@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Shield, ShieldAlert, Sun, Moon, Activity, Radar, History, BarChart3, Info, Menu, X, LogIn, UserPlus, LogOut, User, CheckCircle2 } from "lucide-react";
+import { Shield, ShieldAlert, Sun, Moon, Activity, Radar, History, BarChart3, Info, Menu, X, LogIn, UserPlus, LogOut, User, CheckCircle2, Lock } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import apiService from "../services/api";
@@ -50,12 +50,12 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { path: "/", label: "Home", icon: <Shield size={18} /> },
-    { path: "/scanner", label: "URL Scanner", icon: <Radar size={18} /> },
-    { path: "/dashboard", label: "Dashboard", icon: <BarChart3 size={18} /> },
-    { path: "/history", label: "Scan History", icon: <History size={18} /> },
-    { path: "/model", label: "Model Metrics", icon: <Activity size={18} /> },
-    { path: "/about", label: "About", icon: <Info size={18} /> },
+    { path: "/", label: "Home", icon: <Shield size={18} />, isProtected: false },
+    { path: "/scanner", label: "URL Scanner", icon: <Radar size={18} />, isProtected: true },
+    { path: "/dashboard", label: "Dashboard", icon: <BarChart3 size={18} />, isProtected: true },
+    { path: "/history", label: "Scan History", icon: <History size={18} />, isProtected: true },
+    { path: "/model", label: "Model Metrics", icon: <Activity size={18} />, isProtected: true },
+    { path: "/about", label: "About", icon: <Info size={18} />, isProtected: false },
   ];
 
   return (
@@ -84,6 +84,9 @@ const Navbar = () => {
                 >
                   {item.icon}
                   <span>{item.label}</span>
+                  {item.isProtected && !isAuthenticated && (
+                    <Lock size={12} className="nav-lock-badge-icon" title="Login Required" />
+                  )}
                 </Link>
               );
             })}
@@ -231,7 +234,15 @@ const Navbar = () => {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span className="mobile-item-icon">{item.icon}</span>
-                    <span className="mobile-item-label">{item.label}</span>
+                    <span className="mobile-item-label">
+                      <span>{item.label}</span>
+                      {item.isProtected && !isAuthenticated && (
+                        <span className="mobile-lock-tag">
+                          <Lock size={11} />
+                          <span>Locked</span>
+                        </span>
+                      )}
+                    </span>
                   </Link>
                 );
               })}

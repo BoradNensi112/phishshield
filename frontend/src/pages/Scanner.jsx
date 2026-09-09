@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { 
   Radar, 
   Trash2, 
@@ -14,16 +15,23 @@ import {
   ChevronDown,
   ChevronUp,
   Globe2,
-  Server
+  Server,
+  Lock,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import jsPDF from "jspdf";
 import apiService from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import RiskGauge from "../components/RiskGauge";
 import ThreatReasons from "../components/ThreatReasons";
 import FeatureTable from "../components/FeatureTable";
 
 const Scanner = () => {
+  const { isAuthenticated, currentUser, quickDemoLogin } = useAuth();
+  const navigate = useNavigate();
+
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -40,6 +48,18 @@ const Scanner = () => {
   ];
 
   const handleScan = async (targetUrl = null) => {
+    // STRICT AUTHENTICATION GUARD
+    if (!isAuthenticated) {
+      setError("Terminal Access Restricted: You must be logged in to scan websites.");
+      navigate("/login", {
+        state: {
+          from: { pathname: "/scanner" },
+          message: "Security Clearance Required: Please sign in or register to scan websites."
+        }
+      });
+      return;
+    }
+
     let inputUrl = (targetUrl || url).trim();
     if (!inputUrl) {
       setError("Please enter or paste a valid website URL to analyze.");
@@ -210,16 +230,60 @@ const Scanner = () => {
         <p>Analyze any web address for phishing, credential theft, and spoofing patterns.</p>
       </div>
 
-      {/* Terminal Input Card */}
-      <div className="scanner-card glass-card">
-        <div className="terminal-header">
-          <div className="terminal-dots">
-            <span className="dot dot-red"></span>
-            <span className="dot dot-yellow"></span>
-            <span className="dot dot-green"></span>
+      {/* If NOT authenticated: show security lockdown screen */}
+      {!isAuthenticated ? (
+        <div className="scanner-lockdown-card glass-card">
+          <div className="lockdown-badge">
+            <ShieldAlert size={48} className="lockdown-shield-icon" />
           </div>
-          <span className="terminal-title">TERMINAL: URL_INSPECTION_MODE</span>
+          <h3 className="lockdown-title">TERMINAL ACCESS RESTRICTED</h3>
+          <div className="lockdown-status-tag">SOC CLEARANCE: UNAUTHENTICATED</div>
+          <p className="lockdown-description">
+            Live URL phishing analysis, heuristic anomaly checks, and Random Forest classifier 
+            inference are strictly restricted to authenticated SOC Security Analysts.
+          </p>
+          <p className="lockdown-prompt">
+            Please log in with your credentials or register a new analyst profile to activate the terminal.
+          </p>
+          <div className="lockdown-cta-row">
+            <Link 
+              to="/login" 
+              state={{ from: { pathname: "/scanner" }, message: "Please sign in to access the URL Scanner." }} 
+              className="cyber-btn-primary lockdown-btn"
+            >
+              <LogIn size={18} />
+              <span>Sign In to Terminal</span>
+            </Link>
+            <Link to="/register" className="cyber-btn-secondary lockdown-btn">
+              <UserPlus size={18} />
+              <span>Register New Analyst</span>
+            </Link>
+          </div>
+          <div className="lockdown-demo-box">
+            <span>Evaluating for presentation / viva? </span>
+            <button
+              type="button"
+              onClick={() => {
+                quickDemoLogin("Lead SOC Analyst");
+              }}
+              className="lockdown-demo-btn"
+            >
+              1-Click Sign In as Lead Analyst
+            </button>
+          </div>
         </div>
+      ) : (
+        <>
+          {/* Terminal Input Card */}
+          <div className="scanner-card glass-card">
+            <div className="terminal-header">
+              <div className="terminal-dots">
+                <span className="dot dot-red"></span>
+                <span className="dot dot-yellow"></span>
+                <span className="dot dot-green"></span>
+              </div>
+              <span className="terminal-title">TERMINAL: URL_INSPECTION_MODE</span>
+            </div>
 
         <div className="scanner-input-wrapper">
           <input
@@ -391,6 +455,8 @@ const Scanner = () => {
           {/* Collapsible 33 Features Table */}
           {showFeatures && <FeatureTable features={result.features} />}
         </div>
+      )}
+        </>
       )}
     </div>
   );

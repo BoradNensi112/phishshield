@@ -2452,6 +2452,33 @@
   transform: translateY(-1px);
 }
 
+.nav-lock-badge-icon {
+  color: #f59e0b;
+  opacity: 0.85;
+  margin-left: 2px;
+}
+
+.mobile-lock-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: auto;
+  letter-spacing: 0.5px;
+}
+
+.mobile-item-label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 /* Navbar Logged-In Profile Badge */
 .nav-user-profile-badge {
   display: flex;
@@ -3002,5 +3029,141 @@
   .auth-logo-badge {
     width: 50px;
     height: 50px;
+  }
+}
+
+/* ===================================================================
+   SCANNER SECURITY LOCKDOWN VIEW
+   =================================================================== */
+
+.scanner-lockdown-card {
+  text-align: center;
+  padding: 44px 24px;
+  border-radius: 18px;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: radial-gradient(circle at top, rgba(239, 68, 68, 0.08), var(--card-bg) 70%);
+  max-width: 600px;
+  margin: 20px auto 40px;
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);
+}
+
+.lockdown-badge {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.35);
+  animation: pulse-red 2s infinite ease-in-out;
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(239, 68, 68, 0.6);
+  }
+}
+
+.lockdown-shield-icon {
+  color: #ef4444;
+}
+
+.lockdown-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.lockdown-status-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.lockdown-description {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 auto 12px;
+  max-width: 500px;
+}
+
+.lockdown-prompt {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 0 auto 22px;
+}
+
+.lockdown-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.lockdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.lockdown-demo-box {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.lockdown-demo-btn {
+  background: none;
+  border: none;
+  color: var(--cyan);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 4px;
+  font-size: 0.82rem;
+}
+
+.lockdown-demo-btn:hover {
+  color: #38bdf8;
+}
+
+@media (max-width: 480px) {
+  .scanner-lockdown-card {
+    padding: 30px 14px;
+  }
+  .lockdown-title {
+    font-size: 1.25rem;
+  }
+  .lockdown-cta-row {
+    flex-direction: column;
+    width: 100%;
+  }
+  .lockdown-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
