@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, 
@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import { 
   ShieldCheck, ShieldAlert, Globe, Activity, ArrowUpRight, 
-  TrendingUp, RefreshCw, BarChart3, AlertOctagon 
+  TrendingUp, RefreshCw, BarChart3, AlertOctagon, Radar 
 } from "lucide-react";
 import apiService from "../services/api";
 
@@ -248,7 +248,10 @@ const Dashboard = () => {
       {/* Quick Recent Scan Feed */}
       <div className="recent-scans-card glass-card">
         <div className="recent-header">
-          <h4>Recent Activity Feed</h4>
+          <div className="recent-header-title">
+            <Activity size={20} className="cyan-text" />
+            <h4>Recent Activity Feed</h4>
+          </div>
           <Link to="/history" className="cyber-btn-secondary btn-sm">
             <span>View Full History</span>
             <ArrowUpRight size={16} />
@@ -256,40 +259,83 @@ const Dashboard = () => {
         </div>
 
         {history.length === 0 ? (
-          <p className="empty-history-text">No scans recorded yet. Use the Scanner to test your first URL!</p>
-        ) : (
-          <div className="recent-table-scroll">
-            <table className="cyber-table">
-              <thead>
-                <tr>
-                  <th>URL</th>
-                  <th>Verdict</th>
-                  <th>Confidence</th>
-                  <th>Risk Tier</th>
-                  <th>Timestamp</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.slice(0, 5).map((row) => (
-                  <tr key={row.id}>
-                    <td className="mono truncate-url" title={row.url}>{row.url}</td>
-                    <td>
-                      <span className={`badge ${row.prediction === "Phishing" ? "badge-phish" : "badge-safe"}`}>
-                        {row.prediction}
-                      </span>
-                    </td>
-                    <td className="mono">{row.confidence}%</td>
-                    <td>
-                      <span className={`badge ${row.risk_level === "High" ? "badge-phish" : row.risk_level === "Medium" ? "badge-warn" : "badge-safe"}`}>
-                        {row.risk_level}
-                      </span>
-                    </td>
-                    <td className="text-muted text-sm">{row.timestamp}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="empty-feed-container">
+            <Activity size={40} className="text-muted empty-icon" />
+            <p className="empty-title">No Scans Recorded Yet</p>
+            <p className="empty-sub">URLs evaluated in this session will appear in this real-time forensic threat feed.</p>
+            <Link to="/scanner" className="cyber-btn-primary btn-sm empty-cta">
+              <Radar size={16} />
+              <span>Scan a URL Now</span>
+            </Link>
           </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="recent-table-scroll desktop-only-table">
+              <table className="cyber-table">
+                <thead>
+                  <tr>
+                    <th>URL</th>
+                    <th>Verdict</th>
+                    <th>Confidence</th>
+                    <th>Risk Tier</th>
+                    <th>Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.slice(0, 5).map((row) => (
+                    <tr key={row.id}>
+                      <td className="mono truncate-url-col">
+                        <div className="url-flex-cell">
+                          <span className="cell-url-text" title={row.url}>{row.url}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge ${row.prediction === "Phishing" ? "badge-phish" : "badge-safe"}`}>
+                          {row.prediction === "Phishing" ? <ShieldAlert size={14} /> : <ShieldCheck size={14} />}
+                          {row.prediction}
+                        </span>
+                      </td>
+                      <td className="mono font-semibold">{row.confidence}%</td>
+                      <td>
+                        <span className={`badge ${row.risk_level === "High" ? "badge-phish" : row.risk_level === "Medium" ? "badge-warn" : "badge-safe"}`}>
+                          {row.risk_level}
+                        </span>
+                      </td>
+                      <td className="text-muted text-sm">{row.timestamp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card Feed View */}
+            <div className="recent-mobile-list mobile-only-feed">
+              {history.slice(0, 5).map((row) => (
+                <div key={row.id} className="recent-feed-item">
+                  <div className="feed-item-top">
+                    <span className={`badge ${row.prediction === "Phishing" ? "badge-phish" : "badge-safe"}`}>
+                      {row.prediction === "Phishing" ? <ShieldAlert size={13} /> : <ShieldCheck size={13} />}
+                      {row.prediction}
+                    </span>
+                    <span className={`badge ${row.risk_level === "High" ? "badge-phish" : row.risk_level === "Medium" ? "badge-warn" : "badge-safe"}`}>
+                      {row.risk_level}
+                    </span>
+                    <span className="feed-time">{row.timestamp}</span>
+                  </div>
+                  <div className="feed-item-url mono" title={row.url}>
+                    {row.url}
+                  </div>
+                  <div className="feed-item-meta">
+                    <span className="meta-label">Confidence:</span>
+                    <strong className="mono cyan-text">{row.confidence}%</strong>
+                    <span className="meta-divider">•</span>
+                    <span className="meta-tier text-muted text-sm">{row.tier || "Random Forest"}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
