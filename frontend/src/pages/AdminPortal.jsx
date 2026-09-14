@@ -690,7 +690,8 @@ const AdminPortal = () => {
 
                       <td>
                         <span className="analyst-tag-cell">
-                          {s.user_email || s.user_id || "Anonymous"}
+                          <User size={11} />
+                          <span>{s.user_email || s.user_id || "Anonymous"}</span>
                         </span>
                       </td>
 
@@ -701,11 +702,25 @@ const AdminPortal = () => {
                           }`}
                         >
                           {s.prediction === "Phishing" ? <ShieldAlert size={13} /> : <ShieldCheck size={13} />}
-                          {s.prediction}
+                          <span>{s.prediction}</span>
                         </span>
                       </td>
 
-                      <td className="mono font-semibold">{s.confidence}%</td>
+                      <td>
+                        <div className="confidence-cell">
+                          <span className="mono font-semibold" style={{ fontSize: "0.86rem" }}>
+                            {s.confidence}%
+                          </span>
+                          <div className="confidence-bar-bg">
+                            <div
+                              className={`confidence-bar-fill ${
+                                s.prediction === "Phishing" ? "fill-threat" : "fill-safe"
+                              }`}
+                              style={{ width: `${Math.min(100, Math.max(0, s.confidence))}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
 
                       <td>
                         <span

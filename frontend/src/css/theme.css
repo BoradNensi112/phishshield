@@ -167,13 +167,14 @@ body {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 5px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .badge-safe {
@@ -182,10 +183,22 @@ body {
   border: 1px solid var(--green-safe);
 }
 
+[data-theme="light"] .badge-safe {
+  background: rgba(22, 163, 74, 0.1);
+  color: #15803d;
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
 .badge-phish {
   background: var(--red-bg);
   color: var(--red-threat);
   border: 1px solid var(--red-threat);
+}
+
+[data-theme="light"] .badge-phish {
+  background: rgba(225, 29, 72, 0.1);
+  color: #be123c;
+  border-color: rgba(225, 29, 72, 0.4);
 }
 
 .badge-warn {
@@ -194,10 +207,22 @@ body {
   border: 1px solid var(--amber-warn);
 }
 
+[data-theme="light"] .badge-warn {
+  background: rgba(217, 119, 6, 0.1);
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
 .badge-cyan {
   background: var(--cyan-subtle);
   color: var(--cyan);
   border: 1px solid var(--cyan);
+}
+
+[data-theme="light"] .badge-cyan {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+  border-color: rgba(2, 132, 199, 0.4);
 }
 
 /* App Container */

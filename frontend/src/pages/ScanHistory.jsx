@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { 
   History, Search, Trash2, Download, RefreshCw, Copy, Check, 
   ExternalLink, Filter, AlertTriangle, ShieldCheck, ShieldAlert,
-  Calendar, Clock, User, Shield, ArrowRight, BarChart2
+  Calendar, Clock, User, Shield, ArrowRight, BarChart2, Cpu
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import apiService from "../services/api";
@@ -237,6 +237,20 @@ const ScanHistory = () => {
     }
   };
 
+  const formatEngineTier = (tier) => {
+    if (!tier) return { label: "Random Forest ML", full: "Tier-2 Random Forest ML Classifier", type: "rf" };
+    if (tier.includes("Whitelist") || tier.includes("Allowlist")) {
+      return { label: "Allowlist Fastpath", full: tier, type: "whitelist" };
+    }
+    if (tier.includes("Hybrid")) {
+      return { label: "Hybrid Security ML", full: tier, type: "hybrid" };
+    }
+    if (tier.includes("Random Forest")) {
+      return { label: "Random Forest ML", full: tier, type: "rf" };
+    }
+    return { label: tier, full: tier, type: "default" };
+  };
+
   return (
     <div className="history-page-container">
       {/* Header Banner */}
@@ -458,9 +472,9 @@ const ScanHistory = () => {
                           title="Copy URL"
                         >
                           {copiedId === row.id ? (
-                            <Check size={14} color="#10b981" />
+                            <Check size={13} color="#10b981" />
                           ) : (
-                            <Copy size={14} />
+                            <Copy size={13} />
                           )}
                         </button>
                       </div>
@@ -468,8 +482,9 @@ const ScanHistory = () => {
 
                     {isAdmin && (
                       <td className="text-sm">
-                        <span className="analyst-tag-cell">
-                          {row.user_email || row.user_id || "Anonymous"}
+                        <span className="analyst-tag-cell" title={`Audited Analyst: ${row.user_email || row.user_id || "Anonymous"}`}>
+                          <User size={11} />
+                          <span>{row.user_email || row.user_id || "Anonymous"}</span>
                         </span>
                       </td>
                     )}
@@ -481,14 +496,30 @@ const ScanHistory = () => {
                         }`}
                       >
                         {row.prediction === "Phishing" ? (
-                          <ShieldAlert size={14} />
+                          <ShieldAlert size={13} />
                         ) : (
-                          <ShieldCheck size={14} />
+                          <ShieldCheck size={13} />
                         )}
-                        {row.prediction}
+                        <span>{row.prediction}</span>
                       </span>
                     </td>
-                    <td className="mono font-semibold">{row.confidence}%</td>
+
+                    <td>
+                      <div className="confidence-cell">
+                        <span className="mono font-semibold" style={{ fontSize: "0.86rem" }}>
+                          {row.confidence}%
+                        </span>
+                        <div className="confidence-bar-bg">
+                          <div
+                            className={`confidence-bar-fill ${
+                              row.prediction === "Phishing" ? "fill-threat" : "fill-safe"
+                            }`}
+                            style={{ width: `${Math.min(100, Math.max(0, row.confidence))}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+
                     <td>
                       <span
                         className={`badge ${
@@ -502,19 +533,30 @@ const ScanHistory = () => {
                         {row.risk_level}
                       </span>
                     </td>
-                    <td className="text-sm text-secondary">
-                      {row.tier || "Random Forest ML"}
+
+                    <td>
+                      {(() => {
+                        const eng = formatEngineTier(row.tier);
+                        return (
+                          <span className={`engine-badge engine-badge-${eng.type}`} title={eng.full}>
+                            <Cpu size={12} />
+                            <span>{eng.label}</span>
+                          </span>
+                        );
+                      })()}
                     </td>
-                    <td className="text-sm text-muted">
+
+                    <td className="text-sm text-muted" style={{ whiteSpace: "nowrap" }}>
                       {formatDateDisplay(row.timestamp)}
                     </td>
+
                     <td style={{ textAlign: "right" }}>
                       <button
                         onClick={() => handleDelete(row.id)}
                         className="delete-row-btn"
                         title="Delete record"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
                     </td>
                   </tr>
