@@ -1,5 +1,117 @@
 [
   {
+    "id": "scan_1789378843955",
+    "url": "https://hello.com",
+    "prediction": "Legitimate",
+    "confidence": 87.08,
+    "risk_score": 12.92,
+    "risk_level": "Safe",
+    "tier": "Tier-2 Random Forest ML Classifier",
+    "dns_status": "Active (DNS Resolved)",
+    "timestamp": "2026-09-14T15:10:43.955382Z",
+    "threat_count": 0,
+    "user_id": "usr_8a80fcaf",
+    "user_email": "neni112@gmail.com"
+  },
+  {
+    "id": "scan_1789378305694",
+    "url": "https://hello.in",
+    "prediction": "Legitimate",
+    "confidence": 78.7,
+    "risk_score": 21.3,
+    "risk_level": "Low",
+    "tier": "Tier-2 Random Forest ML Classifier",
+    "dns_status": "Active (DNS Resolved)",
+    "timestamp": "2026-09-14T15:01:45.694537Z",
+    "threat_count": 0,
+    "user_id": "usr_8a80fcaf",
+    "user_email": "neni112@gmail.com"
+  },
+  {
+    "id": "scan_1789378291546",
+    "url": "https://hello@.in",
+    "prediction": "Legitimate",
+    "confidence": 65.99,
+    "risk_score": 34.01,
+    "risk_level": "Low",
+    "tier": "Tier-2 Random Forest ML Classifier",
+    "dns_status": "Inactive / Unregistered Domain",
+    "timestamp": "2026-09-14T15:01:31.546710Z",
+    "threat_count": 2,
+    "user_id": "usr_8a80fcaf",
+    "user_email": "neni112@gmail.com"
+  },
+  {
+    "id": "scan_1789378274973",
+    "url": "https://hello@.com",
+    "prediction": "Legitimate",
+    "confidence": 68.65,
+    "risk_score": 31.35,
+    "risk_level": "Low",
+    "tier": "Tier-2 Random Forest ML Classifier",
+    "dns_status": "Inactive / Unregistered Domain",
+    "timestamp": "2026-09-14T15:01:14.973058Z",
+    "threat_count": 2,
+    "user_id": "usr_8a80fcaf",
+    "user_email": "neni112@gmail.com"
+  },
+  {
+    "id": "scan_1789375758822",
+    "url": "https://support-appleld.com.secureupdate.duilawyeryork.com/login",
+    "prediction": "Phishing",
+    "confidence": 96.5,
+    "risk_score": 96.5,
+    "risk_level": "High",
+    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
+    "dns_status": "Inactive / Unregistered Domain",
+    "timestamp": "2026-09-14T14:19:18.822678Z",
+    "threat_count": 5,
+    "user_id": "usr_admin_01",
+    "user_email": "admin@phishshield.com"
+  },
+  {
+    "id": "scan_1789375757422",
+    "url": "http://174.139.46.123/ap/signin?paypal=verify&update=1",
+    "prediction": "Phishing",
+    "confidence": 96.5,
+    "risk_score": 96.5,
+    "risk_level": "High",
+    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
+    "dns_status": "Active (DNS Resolved)",
+    "timestamp": "2026-09-14T14:19:17.422564Z",
+    "threat_count": 5,
+    "user_id": "usr_admin_01",
+    "user_email": "admin@phishshield.com"
+  },
+  {
+    "id": "scan_1789375756379",
+    "url": "https://onlinesbi.sbi/personal/login.html",
+    "prediction": "Legitimate",
+    "confidence": 99.9,
+    "risk_score": 0.1,
+    "risk_level": "Safe",
+    "tier": "Tier-1 Heuristic Whitelist",
+    "dns_status": "Active (Trusted CDN / Whitelist)",
+    "timestamp": "2026-09-14T14:19:16.379557Z",
+    "threat_count": 0,
+    "user_id": "usr_admin_01",
+    "user_email": "admin@phishshield.com"
+  },
+  {
+    "id": "scan_1789375754906",
+    "url": "https://www.google.com/search?q=cybersecurity",
+    "prediction": "Legitimate",
+    "confidence": 99.9,
+    "risk_score": 0.1,
+    "risk_level": "Safe",
+    "tier": "Tier-1 Heuristic Whitelist",
+    "dns_status": "Active (Trusted CDN / Whitelist)",
+    "timestamp": "2026-09-14T14:19:14.906019Z",
+    "threat_count": 0,
+    "user_id": "usr_admin_01",
+    "user_email": "admin@phishshield.com"
+  },
+  {
     "id": "scan_1789370634776",
     "url": "http://174.139.46.123/ap/signin?paypal=verify&token=abc",
     "prediction": "Phishing",
@@ -38,8 +150,8 @@
     "dns_status": "Active (Trusted CDN / Whitelist)",
     "timestamp": "2026-09-14T12:20:28.526394Z",
     "threat_count": 0,
-    "user_id": "usr_8a80fcaf",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789368590623",
@@ -52,8 +164,8 @@
     "dns_status": "Active (Trusted CDN / Whitelist)",
     "timestamp": "2026-09-14T12:19:50.623956Z",
     "threat_count": 0,
-    "user_id": "",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789368590617",
@@ -66,8 +178,8 @@
     "dns_status": "Active (Trusted CDN / Whitelist)",
     "timestamp": "2026-09-14T12:19:50.617813Z",
     "threat_count": 0,
-    "user_id": "",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789368583665",
@@ -80,8 +192,8 @@
     "dns_status": "Active (Trusted CDN / Whitelist)",
     "timestamp": "2026-09-14T12:19:43.665093Z",
     "threat_count": 0,
-    "user_id": "",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789368526288",
@@ -108,8 +220,8 @@
     "dns_status": "Active (DNS Resolved)",
     "timestamp": "2026-09-14T12:15:34.181787Z",
     "threat_count": 5,
-    "user_id": "usr_8a80fcaf",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789368333991",
@@ -122,8 +234,8 @@
     "dns_status": "Active (DNS Resolved)",
     "timestamp": "2026-09-14T12:15:33.991848Z",
     "threat_count": 5,
-    "user_id": "usr_8a80fcaf",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789368333814",
@@ -136,8 +248,8 @@
     "dns_status": "Active (DNS Resolved)",
     "timestamp": "2026-09-14T12:15:33.814241Z",
     "threat_count": 5,
-    "user_id": "usr_8a80fcaf",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789368332975",
@@ -150,8 +262,8 @@
     "dns_status": "Active (DNS Resolved)",
     "timestamp": "2026-09-14T12:15:32.975423Z",
     "threat_count": 5,
-    "user_id": "usr_8a80fcaf",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789368330345",
@@ -164,8 +276,8 @@
     "dns_status": "Active (DNS Resolved)",
     "timestamp": "2026-09-14T12:15:30.345866Z",
     "threat_count": 5,
-    "user_id": "usr_8a80fcaf",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789366654217",
@@ -178,8 +290,8 @@
     "dns_status": "Inactive / Unregistered Domain",
     "timestamp": "2026-09-14T11:47:34.217146Z",
     "threat_count": 5,
-    "user_id": "usr_8a80fcaf",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789366653044",
@@ -192,8 +304,8 @@
     "dns_status": "Active (DNS Resolved)",
     "timestamp": "2026-09-14T11:47:33.044437Z",
     "threat_count": 5,
-    "user_id": "usr_8a80fcaf",
-    "user_email": "neni112@gmail.com"
+    "user_id": "automated_test_runner",
+    "user_email": "test_runner@phishshield.internal"
   },
   {
     "id": "scan_1789366051978",

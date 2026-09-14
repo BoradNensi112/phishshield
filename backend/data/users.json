@@ -24,15 +24,16 @@
     "role": "SOC Security Analyst",
     "salt": "02c4822b351efe77",
     "hashed_password": "b173af4e3810f5cf3348c7230f69a2802ce50fa7cff42dc82f97dbf534217267",
-    "created_at": "2026-03-09T00:00:00Z"
+    "created_at": "2026-03-09T00:00:00Z",
+    "status": "active"
   },
   "nensi@11gamail.com": {
     "id": "usr_e790815e",
     "name": "hello",
     "email": "nensi@11gamail.com",
     "role": "SOC Security Analyst",
-    "salt": "482488444b545927",
-    "hashed_password": "77d7361e1d5b907c6a8fbf5f74ca14613ef9fdb669ed56014857a22b787c06b1",
+    "salt": "c16a696d71d80163",
+    "hashed_password": "8b43803e4eec4cd4b9e650bafd13ae1cfe43f1ad89d01d8296a64c50ce1da066",
     "created_at": "2026-03-09T00:00:00Z",
     "status": "active"
   },
@@ -42,8 +43,8 @@
     "email": "neni112@gmail.com",
     "role": "SOC Administrator",
     "status": "active",
-    "salt": "cdfddeb6a1f097c6",
-    "hashed_password": "1c380c629e880297de91590617804a2173d0af31342d18b57ba1573364477164",
+    "salt": "5c063314041805f1",
+    "hashed_password": "293901dfb8f1298933ff5a87ce73cc00b194ff33cc0331429733491c87a5e515",
     "created_at": "2026-09-14T11:47:06.493518Z"
   }
 }

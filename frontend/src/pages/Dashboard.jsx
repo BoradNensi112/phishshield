@@ -27,23 +27,54 @@ const Dashboard = () => {
     }
 
     try {
-      const emailFilter = isAdmin ? null : currentUser?.email;
-      const apiScans = await apiService.getScans(emailFilter);
-      if (Array.isArray(apiScans) && apiScans.length > 0) {
-        setHistory(apiScans);
-      } else {
-        const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
-        const userStored = isAdmin
-          ? stored
-          : stored.filter(s => (s.user_email || "").toLowerCase() === (currentUser?.email || "").toLowerCase());
-        setHistory(userStored);
+      const currEmail = (currentUser?.email || "").toLowerCase().trim();
+      const currId = currentUser?.id || null;
+
+      let apiScans = [];
+      if (currEmail) {
+        try {
+          apiScans = await apiService.getScans(currEmail);
+        } catch (e) {
+          console.warn("Backend scans fetch failed, falling back:", e);
+        }
       }
+
+      // Read from localStorage with strict user isolation
+      const rawStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
+      const userStored = rawStored.filter((item) => {
+        const itemEmail = (item.user_email || "").toLowerCase().trim();
+        if (currEmail && itemEmail === currEmail) return true;
+        if (currId && item.user_id === currId) return true;
+        return false;
+      });
+
+      // Merge and deduplicate
+      const combined = [...(Array.isArray(apiScans) ? apiScans : []), ...userStored];
+      const seen = new Set();
+      const deduped = [];
+      for (const item of combined) {
+        const key = item.id || `${item.url}_${item.timestamp}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          deduped.push(item);
+        }
+      }
+
+      // Strict user isolation rule: Every user sees ONLY their own scans
+      const filteredByUser = deduped.filter((item) => {
+        const itemEmail = (item.user_email || "").toLowerCase().trim();
+        if (currEmail && itemEmail === currEmail) return true;
+        if (currId && item.user_id === currId) return true;
+        return false;
+      });
+
+      filteredByUser.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+      setHistory(filteredByUser);
     } catch (e) {
       console.warn("History parse/fetch fallback:", e);
+      const currEmail = (currentUser?.email || "").toLowerCase().trim();
       const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
-      const userStored = isAdmin
-        ? stored
-        : stored.filter(s => (s.user_email || "").toLowerCase() === (currentUser?.email || "").toLowerCase());
+      const userStored = stored.filter(s => (s.user_email || "").toLowerCase().trim() === currEmail);
       setHistory(userStored);
     }
     setLoading(false);
@@ -51,7 +82,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentUser]);
 
   // Compute live scan stats from history
   const totalScans = history.length;
@@ -95,13 +126,23 @@ const Dashboard = () => {
         <div>
           <div className="header-badge">SECURITY OPERATIONS CENTER (SOC)</div>
           <h2>Phishing Defense Dashboard</h2>
-          <p>Real-time analytics, machine learning model telemetry, and threat distributions.</p>
+          <p>
+            Live personal telemetry for <span style={{ color: "var(--color-primary, #00f0ff)", fontWeight: 600 }}>{currentUser?.email || "Analyst"}</span>. Threat distributions and personal scan activity.
+          </p>
         </div>
 
-        <button onClick={loadData} className="cyber-btn-secondary btn-sm" title="Refresh Dashboard">
-          <RefreshCw size={16} />
-          <span>Refresh</span>
-        </button>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+          {isAdmin && (
+            <Link to="/admin" className="cyber-btn-secondary btn-sm" style={{ borderColor: "rgba(0, 240, 255, 0.4)" }}>
+              <ShieldAlert size={15} className="cyan-text" />
+              <span>Org Admin Console</span>
+            </Link>
+          )}
+          <button onClick={loadData} className="cyber-btn-secondary btn-sm" title="Refresh Dashboard">
+            <RefreshCw size={16} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* 4 KPI Cards */}

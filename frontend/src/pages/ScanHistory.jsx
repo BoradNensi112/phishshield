@@ -257,8 +257,7 @@ const ScanHistory = () => {
           <h2>URL Threat Scan History</h2>
           <p style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
             <span className="user-view-tag">
-              <User size={14} /> Analyst History: Viewing personal scans for{" "}
-              <strong>{currentUser?.name || currentUser?.email || "Analyst"}</strong>.
+              <User size={14} /> Personal Scan Log: <strong>{currentUser?.email || "Analyst"}</strong>
             </span>
             {isAdmin && (
               <button

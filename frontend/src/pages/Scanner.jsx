@@ -80,8 +80,8 @@ const Scanner = () => {
     try {
       const data = await apiService.predictUrl({
         url: inputUrl,
-        user_id: currentUser?.id,
-        user_email: currentUser?.email
+        user_id: currentUser?.id || "",
+        user_email: (currentUser?.email || "").toLowerCase().trim()
       });
       setResult(data);
 
