@@ -15,6 +15,7 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const redirectMessage = location.state?.message;
+  const successMessage = location.state?.successMessage;
   const redirectPath = location.state?.from?.pathname || "/scanner";
 
   const handleSubmit = async (e) => {
@@ -59,6 +60,14 @@ const Login = () => {
               CYBER DEFENSE OPERATIONS // SECURE AUTHENTICATION
             </p>
           </div>
+
+          {/* Success Banner after registration */}
+          {successMessage && (
+            <div className="auth-success-banner" role="status">
+              <CheckCircle2 size={18} className="auth-success-icon" />
+              <span>{successMessage}</span>
+            </div>
+          )}
 
           {/* Redirect Notice if user was redirected from a protected route */}
           {redirectMessage && (

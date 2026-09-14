@@ -78,7 +78,11 @@ const Scanner = () => {
     setResult(null);
 
     try {
-      const data = await apiService.predictUrl(inputUrl);
+      const data = await apiService.predictUrl({
+        url: inputUrl,
+        user_id: currentUser?.id,
+        user_email: currentUser?.email
+      });
       setResult(data);
 
       if (data.prediction === "Legitimate" && data.risk_score < 25) {
@@ -113,9 +117,12 @@ const Scanner = () => {
         risk_level: item.risk_level,
         tier: item.tier,
         dns: item.dns_info?.status || "Unknown",
-        timestamp: new Date().toLocaleString(),
+        timestamp: new Date().toISOString(),
+        user_id: currentUser?.id || "anonymous",
+        user_email: (currentUser?.email || "anonymous").toLowerCase(),
+        user_name: currentUser?.name || "Analyst"
       };
-      const updated = [record, ...existing.slice(0, 49)];
+      const updated = [record, ...existing.slice(0, 99)];
       localStorage.setItem("phishshield_history", JSON.stringify(updated));
     } catch (e) {
       console.error("Storage error:", e);

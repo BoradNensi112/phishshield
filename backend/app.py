@@ -65,6 +65,8 @@ def sanitize_url(raw_url: str) -> str:
 
 class PredictRequest(BaseModel):
     url: str
+    user_id: str | None = None
+    user_email: str | None = None
 
 class DnsInfo(BaseModel):
     exists: bool
@@ -206,7 +208,9 @@ def predict_url(req: PredictRequest):
             "tier": tier,
             "dns_status": dns_res.get("status", "Active"),
             "timestamp": datetime.datetime.now().isoformat() + "Z",
-            "threat_count": len(reasons)
+            "threat_count": len(reasons),
+            "user_id": (req.user_id or "").strip(),
+            "user_email": (req.user_email or "").strip().lower()
         }
         _log_scan(scan_log)
     except Exception as e:
@@ -276,8 +280,12 @@ def _load_scans() -> list:
 
 @app.get("/scans")
 @app.get("/api/scans")
-def get_scans():
-    return _load_scans()
+def get_scans(user_email: str | None = None):
+    all_scans = _load_scans()
+    if user_email:
+        clean = user_email.strip().lower()
+        return [s for s in all_scans if s.get("user_email", "").lower() == clean]
+    return all_scans
 
 def _hash_password(password: str, salt: str) -> str:
     return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
@@ -353,14 +361,16 @@ def register_user(req: RegisterRequest):
 
     salt = secrets.token_hex(8)
     user_id = f"usr_{secrets.token_hex(4)}"
+    import datetime
     new_user = {
         "id": user_id,
         "name": name,
         "email": email,
         "role": role,
+        "status": "active",
         "salt": salt,
         "hashed_password": _hash_password(password, salt),
-        "created_at": "2026-03-09T00:00:00Z"
+        "created_at": datetime.datetime.now().isoformat() + "Z"
     }
     users[email] = new_user
     _save_users(users)
@@ -373,7 +383,8 @@ def register_user(req: RegisterRequest):
             "id": user_id,
             "name": name,
             "email": email,
-            "role": role
+            "role": role,
+            "status": "active"
         },
         "token": token
     }
@@ -393,9 +404,17 @@ def login_user(req: LoginRequest):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid analyst credentials or account not found.")
 
+    if user.get("status") == "suspended":
+        raise HTTPException(status_code=403, detail="Account suspended by Administrator. Access denied.")
+
     salt = user.get("salt", "")
     if _hash_password(password, salt) != user.get("hashed_password"):
         raise HTTPException(status_code=401, detail="Incorrect password. Access denied.")
+
+    is_admin = (
+        user.get("role") in ["SOC Administrator", "Admin", "Threat Intelligence Lead"]
+        or email == "admin@phishshield.com"
+    )
 
     token = f"token_{secrets.token_hex(16)}"
     return {
@@ -405,10 +424,78 @@ def login_user(req: LoginRequest):
             "id": user.get("id"),
             "name": user.get("name"),
             "email": user.get("email"),
-            "role": user.get("role", "SOC Security Analyst")
+            "role": user.get("role", "SOC Security Analyst"),
+            "status": user.get("status", "active"),
+            "is_admin": is_admin
         },
         "token": token
     }
+
+# ==========================================
+# ADMIN PORTAL ENDPOINTS
+# ==========================================
+@app.get("/api/admin/users")
+def get_admin_users():
+    users = _load_users()
+    sanitized = []
+    for email, u in users.items():
+        sanitized.append({
+            "id": u.get("id"),
+            "name": u.get("name"),
+            "email": u.get("email"),
+            "role": u.get("role", "SOC Security Analyst"),
+            "status": u.get("status", "active"),
+            "created_at": u.get("created_at", "2026-01-01T00:00:00Z"),
+        })
+    return sanitized
+
+class RoleUpdateRequest(BaseModel):
+    role: str
+
+@app.put("/api/admin/users/{email}/role")
+def update_user_role(email: str, req: RoleUpdateRequest):
+    users = _load_users()
+    clean_email = email.strip().lower()
+    if clean_email not in users:
+        raise HTTPException(status_code=404, detail="Analyst profile not found.")
+    users[clean_email]["role"] = req.role.strip()
+    _save_users(users)
+    return {"success": True, "message": f"Privilege updated to {req.role}"}
+
+class StatusUpdateRequest(BaseModel):
+    status: str
+
+@app.put("/api/admin/users/{email}/status")
+def update_user_status(email: str, req: StatusUpdateRequest):
+    users = _load_users()
+    clean_email = email.strip().lower()
+    if clean_email not in users:
+        raise HTTPException(status_code=404, detail="Analyst profile not found.")
+    if clean_email == "admin@phishshield.com":
+        raise HTTPException(status_code=400, detail="Cannot suspend root system administrator.")
+    new_status = req.status.strip().lower()
+    if new_status not in ["active", "suspended"]:
+        raise HTTPException(status_code=400, detail="Status must be 'active' or 'suspended'.")
+    users[clean_email]["status"] = new_status
+    _save_users(users)
+    return {"success": True, "message": f"Account status set to {new_status}."}
+
+@app.delete("/api/admin/users/{email}")
+def delete_user(email: str):
+    users = _load_users()
+    clean_email = email.strip().lower()
+    if clean_email not in users:
+        raise HTTPException(status_code=404, detail="Analyst profile not found.")
+    if clean_email == "admin@phishshield.com":
+        raise HTTPException(status_code=400, detail="Cannot delete root system administrator.")
+    del users[clean_email]
+    _save_users(users)
+    return {"success": True, "message": "Analyst profile permanently removed."}
+
+@app.get("/api/admin/scans")
+def get_admin_scans():
+    return _load_scans()
+
 
 # Serve Frontend SPA in Production if built
 FRONTEND_DIST = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend", "dist"))

@@ -7,7 +7,7 @@ import apiService from "../services/api";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { currentUser, isAuthenticated, logout } = useAuth();
+  const { currentUser, isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [apiOnline, setApiOnline] = useState(false);
@@ -55,6 +55,7 @@ const Navbar = () => {
     { path: "/dashboard", label: "Dashboard", icon: <BarChart3 size={18} />, isProtected: true },
     { path: "/history", label: "Scan History", icon: <History size={18} />, isProtected: true },
     { path: "/model", label: "Model Metrics", icon: <Activity size={18} />, isProtected: true },
+    ...(isAdmin ? [{ path: "/admin", label: "Admin Console", icon: <ShieldAlert size={18} />, isProtected: true }] : []),
     { path: "/about", label: "About", icon: <Info size={18} />, isProtected: false },
   ];
 

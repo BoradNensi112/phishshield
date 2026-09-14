@@ -9,8 +9,10 @@ import {
   TrendingUp, RefreshCw, BarChart3, AlertOctagon, Radar 
 } from "lucide-react";
 import apiService from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => {
+  const { currentUser, isAdmin } = useAuth();
   const [modelInfo, setModelInfo] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,10 +27,24 @@ const Dashboard = () => {
     }
 
     try {
-      const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
-      setHistory(stored);
+      const emailFilter = isAdmin ? null : currentUser?.email;
+      const apiScans = await apiService.getScans(emailFilter);
+      if (Array.isArray(apiScans) && apiScans.length > 0) {
+        setHistory(apiScans);
+      } else {
+        const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
+        const userStored = isAdmin
+          ? stored
+          : stored.filter(s => (s.user_email || "").toLowerCase() === (currentUser?.email || "").toLowerCase());
+        setHistory(userStored);
+      }
     } catch (e) {
-      console.error("History parse failed:", e);
+      console.warn("History parse/fetch fallback:", e);
+      const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
+      const userStored = isAdmin
+        ? stored
+        : stored.filter(s => (s.user_email || "").toLowerCase() === (currentUser?.email || "").toLowerCase());
+      setHistory(userStored);
     }
     setLoading(false);
   };

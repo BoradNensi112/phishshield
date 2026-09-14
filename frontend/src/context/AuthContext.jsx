@@ -131,14 +131,14 @@ export const AuthProvider = ({ children }) => {
         role: cleanRole,
       });
       if (res && res.user) {
-        setCurrentUser(res.user);
-        // Save local backup as well
+        // Save local backup as well (without logging in)
         saveLocalUser(cleanEmail, {
           id: res.user.id,
           name: cleanName,
           email: cleanEmail,
           password,
           role: cleanRole,
+          status: "active"
         });
         setLoading(false);
         return { success: true, user: res.user };
@@ -163,9 +163,9 @@ export const AuthProvider = ({ children }) => {
       name: cleanName,
       email: cleanEmail,
       role: cleanRole,
+      status: "active"
     };
     saveLocalUser(cleanEmail, { ...newUser, password });
-    setCurrentUser(newUser);
     setLoading(false);
     return { success: true, user: newUser };
   };
@@ -186,11 +186,22 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  const isAdmin = Boolean(
+    currentUser && (
+      currentUser.role === "SOC Administrator" ||
+      currentUser.role === "Admin" ||
+      currentUser.email === "admin@phishshield.com" ||
+      currentUser.is_admin === true ||
+      currentUser.role === "Threat Intelligence Lead"
+    )
+  );
+
   return (
     <AuthContext.Provider
       value={{
         currentUser,
         isAuthenticated: Boolean(currentUser),
+        isAdmin,
         loading,
         login,
         register,

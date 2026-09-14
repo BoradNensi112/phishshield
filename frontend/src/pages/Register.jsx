@@ -63,7 +63,11 @@ const Register = () => {
     try {
       setIsSubmitting(true);
       await register(name, email, password, role);
-      navigate("/scanner");
+      navigate("/login", {
+        state: {
+          successMessage: "Account created successfully! Please sign in with your analyst credentials to enter the SOC terminal."
+        }
+      });
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {

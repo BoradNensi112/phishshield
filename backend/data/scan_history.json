@@ -1,5 +1,19 @@
 [
   {
+    "id": "scan_1789366051978",
+    "url": "https://secure-paypal-login-fake-threat.com",
+    "prediction": "Phishing",
+    "confidence": 72.99,
+    "risk_score": 72.99,
+    "risk_level": "High",
+    "tier": "Tier-2 Random Forest ML Classifier",
+    "dns_status": "Inactive / Unregistered Domain",
+    "timestamp": "2026-09-14T11:37:31.978245Z",
+    "threat_count": 2,
+    "user_id": "usr_07d90422",
+    "user_email": "audit_analyst@phishshield.com"
+  },
+  {
     "id": "scan_1789363184573",
     "url": "https://support-appleld.com.secureupdate.duilawyeryork.com/login",
     "prediction": "Phishing",

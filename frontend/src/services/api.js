@@ -28,8 +28,9 @@ export const apiService = {
     return response.data;
   },
 
-  predictUrl: async (url) => {
-    const response = await apiClient.post("/predict", { url });
+  predictUrl: async (payload) => {
+    const data = typeof payload === "string" ? { url: payload } : payload;
+    const response = await apiClient.post("/predict", data);
     return response.data;
   },
 
@@ -43,8 +44,35 @@ export const apiService = {
     return response.data;
   },
 
-  getScans: async () => {
-    const response = await apiClient.get("/scans");
+  getScans: async (userEmail = null) => {
+    const params = userEmail ? { user_email: userEmail } : {};
+    const response = await apiClient.get("/scans", { params });
+    return response.data;
+  },
+
+  // Admin Management Endpoints
+  getAdminUsers: async () => {
+    const response = await apiClient.get("/api/admin/users");
+    return response.data;
+  },
+
+  updateUserRole: async (email, role) => {
+    const response = await apiClient.put(`/api/admin/users/${encodeURIComponent(email)}/role`, { role });
+    return response.data;
+  },
+
+  updateUserStatus: async (email, status) => {
+    const response = await apiClient.put(`/api/admin/users/${encodeURIComponent(email)}/status`, { status });
+    return response.data;
+  },
+
+  deleteUser: async (email) => {
+    const response = await apiClient.delete(`/api/admin/users/${encodeURIComponent(email)}`);
+    return response.data;
+  },
+
+  getAdminScans: async () => {
+    const response = await apiClient.get("/api/admin/scans");
     return response.data;
   },
 

@@ -13,7 +13,9 @@ import ModelPerformance from "./pages/ModelPerformance";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AdminPortal from "./pages/AdminPortal";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 import "./css/index.css";
 
@@ -62,6 +64,14 @@ function App() {
                     <ProtectedRoute>
                       <ModelPerformance />
                     </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <AdminPortal />
+                    </AdminRoute>
                   }
                 />
               </Routes>
