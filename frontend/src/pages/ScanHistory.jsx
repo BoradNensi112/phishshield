@@ -34,46 +34,40 @@ const ScanHistory = () => {
       const currEmail = (currentUser?.email || "").toLowerCase().trim();
       const currId = currentUser?.id || null;
 
-      // 1. Fetch from server with logged-in user email filter
       let serverScans = [];
-      try {
-        serverScans = await apiService.getScans(currEmail || null);
-      } catch (e) {
-        console.warn("Server scans fetch failed, falling back to local storage:", e);
-      }
-
-      // 2. Fetch from localStorage and strictly isolate by current user
-      const rawStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
-      const userStored = rawStored.filter((item) => {
-        const itemEmail = (item.user_email || "").toLowerCase().trim();
-        if (currEmail && itemEmail === currEmail) return true;
-        if (currId && item.user_id === currId) return true;
-        return false;
-      });
-
-      // Merge both sources with deduplication by ID or (url + timestamp)
-      const combined = [...(Array.isArray(serverScans) ? serverScans : []), ...userStored];
-      const seen = new Set();
-      const deduped = [];
-      for (const item of combined) {
-        const key = item.id || `${item.url}_${item.timestamp}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          deduped.push(item);
+      let fetchedFromServer = false;
+      if (currEmail) {
+        try {
+          serverScans = await apiService.getScans(currEmail);
+          if (Array.isArray(serverScans)) {
+            fetchedFromServer = true;
+          }
+        } catch (e) {
+          console.warn("Server scans fetch failed, falling back to local storage:", e);
         }
       }
 
-      // Strict user isolation rule: Every user sees ONLY their own scans
-      const filteredByUser = deduped.filter((item) => {
-        const itemEmail = (item.user_email || "").toLowerCase().trim();
-        if (currEmail && itemEmail === currEmail) return true;
-        if (currId && item.user_id === currId) return true;
-        return false;
-      });
-
-      // Sort newest first
-      filteredByUser.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-      setHistory(filteredByUser);
+      if (fetchedFromServer) {
+        // Strict single source of truth from backend
+        const cleanScans = serverScans.filter((s) => (s.user_email || "").toLowerCase().trim() === currEmail);
+        cleanScans.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+        setHistory(cleanScans);
+        // Cache to localStorage for offline fallback
+        try {
+          localStorage.setItem("phishshield_history", JSON.stringify(cleanScans));
+        } catch (e) {}
+      } else {
+        // Fallback to offline localStorage cache
+        const rawStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
+        const userStored = rawStored.filter((item) => {
+          const itemEmail = (item.user_email || "").toLowerCase().trim();
+          if (currEmail && itemEmail === currEmail) return true;
+          if (currId && item.user_id === currId) return true;
+          return false;
+        });
+        userStored.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+        setHistory(userStored);
+      }
     } catch (e) {
       console.error("Failed to load history:", e);
     } finally {
@@ -85,27 +79,51 @@ const ScanHistory = () => {
     loadHistory();
   }, [currentUser]);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    const targetItem = history.find((item) => item.id === id);
+    // Optimistically update UI
     const updated = history.filter((item) => item.id !== id);
     setHistory(updated);
-    
-    // Also remove from localStorage
+
+    const currEmail = (currentUser?.email || "").toLowerCase().trim();
+
+    // 1. Permanently delete from backend server
+    try {
+      await apiService.deleteScan(id, currEmail || null);
+    } catch (e) {
+      console.error("Backend delete failed:", e);
+    }
+
+    // 2. Remove from localStorage cache
     try {
       const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
-      const filteredLocal = stored.filter((item) => item.id !== id);
+      const filteredLocal = stored.filter(
+        (item) => item.id !== id && !(targetItem && item.url === targetItem.url && item.timestamp === targetItem.timestamp)
+      );
       localStorage.setItem("phishshield_history", JSON.stringify(filteredLocal));
     } catch (e) {
       console.error(e);
     }
   };
 
-  const handleClearAll = () => {
-    const confirmMsg = "Are you sure you want to clear your private scan records?";
+  const handleClearAll = async () => {
+    const confirmMsg = "Are you sure you want to permanently delete all your private scan records? This cannot be undone.";
     if (window.confirm(confirmMsg)) {
       setHistory([]);
+      const currEmail = (currentUser?.email || "").toLowerCase().trim();
+
+      // 1. Purge from backend database permanently
+      try {
+        if (currEmail) {
+          await apiService.clearScans(currEmail);
+        }
+      } catch (e) {
+        console.error("Backend clear failed:", e);
+      }
+
+      // 2. Clear from localStorage cache
       try {
         const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
-        const currEmail = (currentUser?.email || "").toLowerCase().trim();
         const retained = stored.filter(
           (item) => (item.user_email || "").toLowerCase().trim() !== currEmail
         );
@@ -158,6 +176,21 @@ const ScanHistory = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleExportJSON = () => {
+    if (filtered.length === 0) return;
+    const jsonContent = JSON.stringify(filtered, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const dateTag = dateFilter === "today" ? "today" : dateFilter === "custom" ? customDate : "all";
+    link.download = `phishshield_scans_${dateTag}_${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   // Helper date checker
@@ -289,6 +322,15 @@ const ScanHistory = () => {
           >
             <Download size={15} />
             <span>Export CSV</span>
+          </button>
+          <button
+            onClick={handleExportJSON}
+            disabled={filtered.length === 0}
+            className="cyber-btn-secondary btn-sm"
+            title="Export filtered records as JSON"
+          >
+            <Download size={15} />
+            <span>Export JSON</span>
           </button>
           <button
             onClick={handleClearAll}

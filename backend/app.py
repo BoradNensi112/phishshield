@@ -74,6 +74,8 @@ class DnsInfo(BaseModel):
     status: str
 
 class PredictResponse(BaseModel):
+    id: str | None = None
+    timestamp: str | None = None
     url: str
     prediction: str
     confidence: float
@@ -227,10 +229,12 @@ def predict_url(req: PredictRequest):
         reasons.append("Structural lexical anomalies detected by Random Forest model")
 
     # Log scan result to server-side JSON storage
+    import datetime
+    scan_id = f"scan_{int(datetime.datetime.now().timestamp() * 1000)}"
+    scan_timestamp = datetime.datetime.now().isoformat() + "Z"
     try:
-        import datetime
         scan_log = {
-            "id": f"scan_{int(datetime.datetime.now().timestamp() * 1000)}",
+            "id": scan_id,
             "url": normalized_url,
             "prediction": prediction,
             "confidence": confidence,
@@ -238,7 +242,7 @@ def predict_url(req: PredictRequest):
             "risk_level": risk_level,
             "tier": tier,
             "dns_status": dns_res.get("status", "Active"),
-            "timestamp": datetime.datetime.now().isoformat() + "Z",
+            "timestamp": scan_timestamp,
             "threat_count": len(reasons),
             "user_id": (req.user_id or "").strip(),
             "user_email": (req.user_email or "").strip().lower()
@@ -248,6 +252,8 @@ def predict_url(req: PredictRequest):
         print(f"[-] Non-critical scan log error: {e}")
 
     return PredictResponse(
+        id=scan_id,
+        timestamp=scan_timestamp,
         url=normalized_url,
         prediction=prediction,
         confidence=confidence,
@@ -321,6 +327,67 @@ def get_scans(user_email: str | None = None):
         clean = user_email.strip().lower()
         return [s for s in all_scans if s.get("user_email", "").lower() == clean]
     return all_scans
+
+@app.delete("/scans/{scan_id}")
+@app.delete("/api/scans/{scan_id}")
+def delete_scan(scan_id: str, user_email: str | None = None):
+    all_scans = _load_scans()
+    clean_email = user_email.strip().lower() if user_email else None
+
+    # Find target scan
+    target_index = -1
+    for i, s in enumerate(all_scans):
+        sid = str(s.get("id", ""))
+        if sid == scan_id or sid.endswith(scan_id) or scan_id in sid:
+            target_index = i
+            break
+
+    if target_index == -1:
+        # Also try matching by composite key (url + timestamp)
+        for i, s in enumerate(all_scans):
+            composite = f"{s.get('url')}_{s.get('timestamp')}"
+            if composite == scan_id:
+                target_index = i
+                break
+
+    if target_index == -1:
+        raise HTTPException(status_code=404, detail="Scan record not found.")
+
+    target = all_scans[target_index]
+
+    if clean_email:
+        target_email = (target.get("user_email") or "").lower()
+        users = _load_users()
+        user_record = users.get(clean_email, {})
+        is_admin = user_record.get("role") in ["SOC Administrator", "Lead SOC Analyst"]
+        if target_email != clean_email and not is_admin:
+            raise HTTPException(status_code=403, detail="Permission denied to delete this scan record.")
+
+    removed_item = all_scans.pop(target_index)
+    _save_scans(all_scans)
+    return {
+        "success": True,
+        "message": "Scan record permanently deleted.",
+        "deleted_id": removed_item.get("id"),
+        "url": removed_item.get("url")
+    }
+
+@app.delete("/scans")
+@app.delete("/api/scans")
+def clear_scans(user_email: str | None = None):
+    all_scans = _load_scans()
+    if not user_email:
+        raise HTTPException(status_code=400, detail="user_email query parameter is required.")
+
+    clean_email = user_email.strip().lower()
+    remaining = [s for s in all_scans if (s.get("user_email") or "").lower() != clean_email]
+    deleted_count = len(all_scans) - len(remaining)
+    _save_scans(remaining)
+    return {
+        "success": True,
+        "message": f"Successfully purged {deleted_count} private scan records for {clean_email}.",
+        "deleted_count": deleted_count
+    }
 
 def _hash_password(password: str, salt: str) -> str:
     return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()

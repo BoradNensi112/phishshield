@@ -50,6 +50,17 @@ export const apiService = {
     return response.data;
   },
 
+  deleteScan: async (scanId, userEmail = null) => {
+    const params = userEmail ? { user_email: userEmail } : {};
+    const response = await apiClient.delete(`/scans/${encodeURIComponent(scanId)}`, { params });
+    return response.data;
+  },
+
+  clearScans: async (userEmail) => {
+    const response = await apiClient.delete("/scans", { params: { user_email: userEmail } });
+    return response.data;
+  },
+
   // Admin Management Endpoints
   getAdminUsers: async () => {
     const response = await apiClient.get("/api/admin/users");

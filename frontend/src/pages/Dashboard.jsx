@@ -31,45 +31,39 @@ const Dashboard = () => {
       const currId = currentUser?.id || null;
 
       let apiScans = [];
+      let fetchedFromServer = false;
       if (currEmail) {
         try {
           apiScans = await apiService.getScans(currEmail);
+          if (Array.isArray(apiScans)) {
+            fetchedFromServer = true;
+          }
         } catch (e) {
-          console.warn("Backend scans fetch failed, falling back:", e);
+          console.warn("Backend scans fetch failed, falling back to local cache:", e);
         }
       }
 
-      // Read from localStorage with strict user isolation
-      const rawStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
-      const userStored = rawStored.filter((item) => {
-        const itemEmail = (item.user_email || "").toLowerCase().trim();
-        if (currEmail && itemEmail === currEmail) return true;
-        if (currId && item.user_id === currId) return true;
-        return false;
-      });
-
-      // Merge and deduplicate
-      const combined = [...(Array.isArray(apiScans) ? apiScans : []), ...userStored];
-      const seen = new Set();
-      const deduped = [];
-      for (const item of combined) {
-        const key = item.id || `${item.url}_${item.timestamp}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          deduped.push(item);
-        }
+      if (fetchedFromServer) {
+        // Strict single source of truth from backend
+        const cleanScans = apiScans.filter((s) => (s.user_email || "").toLowerCase().trim() === currEmail);
+        cleanScans.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+        setHistory(cleanScans);
+        // Cache to localStorage for offline fallback
+        try {
+          localStorage.setItem("phishshield_history", JSON.stringify(cleanScans));
+        } catch (e) {}
+      } else {
+        // Fallback to offline localStorage cache
+        const rawStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
+        const userStored = rawStored.filter((item) => {
+          const itemEmail = (item.user_email || "").toLowerCase().trim();
+          if (currEmail && itemEmail === currEmail) return true;
+          if (currId && item.user_id === currId) return true;
+          return false;
+        });
+        userStored.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+        setHistory(userStored);
       }
-
-      // Strict user isolation rule: Every user sees ONLY their own scans
-      const filteredByUser = deduped.filter((item) => {
-        const itemEmail = (item.user_email || "").toLowerCase().trim();
-        if (currEmail && itemEmail === currEmail) return true;
-        if (currId && item.user_id === currId) return true;
-        return false;
-      });
-
-      filteredByUser.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-      setHistory(filteredByUser);
     } catch (e) {
       console.warn("History parse/fetch fallback:", e);
       const currEmail = (currentUser?.email || "").toLowerCase().trim();

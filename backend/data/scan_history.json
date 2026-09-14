@@ -1,5 +1,61 @@
 [
   {
+    "id": "scan_1789387032526",
+    "url": "https://support-appleld.com.secureupdate.duilawyeryork.com/login",
+    "prediction": "Phishing",
+    "confidence": 96.5,
+    "risk_score": 96.5,
+    "risk_level": "High",
+    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
+    "dns_status": "Inactive / Unregistered Domain",
+    "timestamp": "2026-09-14T17:27:12.526557Z",
+    "threat_count": 5,
+    "user_id": "usr_1789185150631",
+    "user_email": "boradnensi112@gmail.com"
+  },
+  {
+    "id": "scan_1789387031131",
+    "url": "http://174.139.46.123/ap/signin?paypal=verify&update=1",
+    "prediction": "Phishing",
+    "confidence": 96.5,
+    "risk_score": 96.5,
+    "risk_level": "High",
+    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
+    "dns_status": "Active (DNS Resolved)",
+    "timestamp": "2026-09-14T17:27:11.131090Z",
+    "threat_count": 5,
+    "user_id": "usr_1789185150631",
+    "user_email": "boradnensi112@gmail.com"
+  },
+  {
+    "id": "scan_1789387029657",
+    "url": "https://onlinesbi.sbi/personal/login.html",
+    "prediction": "Legitimate",
+    "confidence": 99.9,
+    "risk_score": 0.1,
+    "risk_level": "Safe",
+    "tier": "Tier-1 Heuristic Whitelist",
+    "dns_status": "Active (Trusted CDN / Whitelist)",
+    "timestamp": "2026-09-14T17:27:09.657183Z",
+    "threat_count": 0,
+    "user_id": "usr_1789185150631",
+    "user_email": "boradnensi112@gmail.com"
+  },
+  {
+    "id": "scan_1789387028350",
+    "url": "https://www.google.com/search?q=cybersecurity",
+    "prediction": "Legitimate",
+    "confidence": 99.9,
+    "risk_score": 0.1,
+    "risk_level": "Safe",
+    "tier": "Tier-1 Heuristic Whitelist",
+    "dns_status": "Active (Trusted CDN / Whitelist)",
+    "timestamp": "2026-09-14T17:27:08.350186Z",
+    "threat_count": 0,
+    "user_id": "usr_1789185150631",
+    "user_email": "boradnensi112@gmail.com"
+  },
+  {
     "id": "scan_1789378843955",
     "url": "https://hello.com",
     "prediction": "Legitimate",
@@ -224,48 +280,6 @@
     "user_email": "test_runner@phishshield.internal"
   },
   {
-    "id": "scan_1789368333991",
-    "url": "http://174.139.46.123/ap/signin?paypal=verify&u",
-    "prediction": "Phishing",
-    "confidence": 96.5,
-    "risk_score": 96.5,
-    "risk_level": "High",
-    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
-    "dns_status": "Active (DNS Resolved)",
-    "timestamp": "2026-09-14T12:15:33.991848Z",
-    "threat_count": 5,
-    "user_id": "automated_test_runner",
-    "user_email": "test_runner@phishshield.internal"
-  },
-  {
-    "id": "scan_1789368333814",
-    "url": "http://174.139.46.123/ap/signin?paypal=verify&u",
-    "prediction": "Phishing",
-    "confidence": 96.5,
-    "risk_score": 96.5,
-    "risk_level": "High",
-    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
-    "dns_status": "Active (DNS Resolved)",
-    "timestamp": "2026-09-14T12:15:33.814241Z",
-    "threat_count": 5,
-    "user_id": "automated_test_runner",
-    "user_email": "test_runner@phishshield.internal"
-  },
-  {
-    "id": "scan_1789368332975",
-    "url": "http://174.139.46.123/ap/signin?paypal=verify&u",
-    "prediction": "Phishing",
-    "confidence": 96.5,
-    "risk_score": 96.5,
-    "risk_level": "High",
-    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
-    "dns_status": "Active (DNS Resolved)",
-    "timestamp": "2026-09-14T12:15:32.975423Z",
-    "threat_count": 5,
-    "user_id": "automated_test_runner",
-    "user_email": "test_runner@phishshield.internal"
-  },
-  {
     "id": "scan_1789368330345",
     "url": "http://174.139.46.123/ap/signin?paypal=verify&update=1",
     "prediction": "Phishing",
@@ -289,20 +303,6 @@
     "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
     "dns_status": "Inactive / Unregistered Domain",
     "timestamp": "2026-09-14T11:47:34.217146Z",
-    "threat_count": 5,
-    "user_id": "automated_test_runner",
-    "user_email": "test_runner@phishshield.internal"
-  },
-  {
-    "id": "scan_1789366653044",
-    "url": "http://174.139.46.123/ap/signin?paypal=verify&update=1",
-    "prediction": "Phishing",
-    "confidence": 96.5,
-    "risk_score": 96.5,
-    "risk_level": "High",
-    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
-    "dns_status": "Active (DNS Resolved)",
-    "timestamp": "2026-09-14T11:47:33.044437Z",
     "threat_count": 5,
     "user_id": "automated_test_runner",
     "user_email": "test_runner@phishshield.internal"
@@ -406,18 +406,6 @@
     "threat_count": 1
   },
   {
-    "id": "scan_1789186725588",
-    "url": "https://192.0.0.1",
-    "prediction": "Phishing",
-    "confidence": 69.61,
-    "risk_score": 69.61,
-    "risk_level": "Medium",
-    "tier": "Tier-2 Random Forest ML Classifier",
-    "dns_status": "Active (DNS Resolved)",
-    "timestamp": "2026-09-12T09:48:45.588984Z",
-    "threat_count": 1
-  },
-  {
     "id": "scan_1789186715072",
     "url": "https://192.168.1",
     "prediction": "Phishing",
@@ -440,41 +428,5 @@
     "dns_status": "Active (DNS Resolved)",
     "timestamp": "2026-09-12T09:47:25.376687Z",
     "threat_count": 1
-  },
-  {
-    "id": "scan_1789186427589",
-    "url": "http://174.139.46.123/ap/signin?paypal=verify&update=1",
-    "prediction": "Phishing",
-    "confidence": 96.5,
-    "risk_score": 96.5,
-    "risk_level": "High",
-    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
-    "dns_status": "Active (DNS Resolved)",
-    "timestamp": "2026-09-12T09:43:47.589008Z",
-    "threat_count": 5
-  },
-  {
-    "id": "scan_1789186317324",
-    "url": "https://www.kaggle.com/",
-    "prediction": "Legitimate",
-    "confidence": 98.7,
-    "risk_score": 1.3,
-    "risk_level": "Safe",
-    "tier": "Tier-2 Random Forest ML Classifier",
-    "dns_status": "Active (DNS Resolved)",
-    "timestamp": "2026-09-12T09:41:57.324312Z",
-    "threat_count": 0
-  },
-  {
-    "id": "scan_1789186124539",
-    "url": "http://174.139.46.123/ap/signin?paypal=verify&update=1",
-    "prediction": "Phishing",
-    "confidence": 96.5,
-    "risk_score": 96.5,
-    "risk_level": "High",
-    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
-    "dns_status": "Active (DNS Resolved)",
-    "timestamp": "2026-09-12T09:38:44.539787Z",
-    "threat_count": 5
   }
 ]

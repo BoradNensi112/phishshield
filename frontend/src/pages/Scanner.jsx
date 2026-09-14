@@ -109,7 +109,7 @@ const Scanner = () => {
     try {
       const existing = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
       const record = {
-        id: Date.now().toString(),
+        id: item.id || Date.now().toString(),
         url: item.url,
         prediction: item.prediction,
         confidence: item.confidence,
@@ -117,12 +117,14 @@ const Scanner = () => {
         risk_level: item.risk_level,
         tier: item.tier,
         dns: item.dns_info?.status || "Unknown",
-        timestamp: new Date().toISOString(),
+        timestamp: item.timestamp || new Date().toISOString(),
         user_id: currentUser?.id || "anonymous",
-        user_email: (currentUser?.email || "anonymous").toLowerCase(),
+        user_email: (currentUser?.email || "anonymous").toLowerCase().trim(),
         user_name: currentUser?.name || "Analyst"
       };
-      const updated = [record, ...existing.slice(0, 99)];
+      // Prevent duplicate if item already exists in local cache
+      const filtered = existing.filter((e) => e.id !== record.id && e.url !== record.url);
+      const updated = [record, ...filtered.slice(0, 99)];
       localStorage.setItem("phishshield_history", JSON.stringify(updated));
     } catch (e) {
       console.error("Storage error:", e);
