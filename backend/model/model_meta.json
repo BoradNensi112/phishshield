@@ -6,16 +6,16 @@
     "dataset_total_samples": 11429,
     "train_samples": 9143,
     "test_samples": 2286,
-    "accuracy": 88.67,
-    "precision": 88.04,
-    "recall": 89.5,
-    "f1_score": 88.76,
-    "roc_auc": 0.9584,
+    "accuracy": 98.95,
+    "precision": 98.78,
+    "recall": 99.13,
+    "f1_score": 98.95,
+    "roc_auc": 0.9962,
     "confusion_matrix": {
-        "true_negative": 1004,
-        "false_positive": 139,
-        "false_negative": 120,
-        "true_positive": 1023
+        "true_negative": 1129,
+        "false_positive": 14,
+        "false_negative": 10,
+        "true_positive": 1133
     },
     "top_features": [
         {
@@ -69,5 +69,5 @@
             "importance": 4.69
         }
     ],
-    "training_time_seconds": 6.44
+    "training_time_seconds": 7.06
 }

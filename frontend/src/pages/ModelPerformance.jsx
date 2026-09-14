@@ -37,18 +37,18 @@ const ModelPerformance = () => {
   };
 
   const cm = modelInfo?.confusion_matrix || {
-    true_negative: 1025,
-    false_positive: 118,
-    false_negative: 162,
-    true_positive: 981,
+    true_negative: 1129,
+    false_positive: 14,
+    false_negative: 10,
+    true_positive: 1133,
   };
 
   const metrics = [
-    { label: "Overall Accuracy", value: modelInfo ? `${modelInfo.accuracy}%` : "87.75%", sub: "Test subset evaluation" },
-    { label: "Precision (Phishing)", value: modelInfo ? `${modelInfo.precision}%` : "89.26%", sub: "Correctly flagged fraud" },
-    { label: "Recall (Phishing)", value: modelInfo ? `${modelInfo.recall}%` : "85.83%", sub: "Total threats intercepted" },
-    { label: "F1 Score", value: modelInfo ? `${modelInfo.f1_score}%` : "87.51%", sub: "Harmonic balance" },
-    { label: "ROC-AUC Curve", value: modelInfo ? `${(modelInfo.roc_auc * 100).toFixed(2)}%` : "94.74%", sub: "Area under ROC curve" },
+    { label: "Overall Accuracy", value: modelInfo ? `${modelInfo.accuracy}%` : "98.95%", sub: "Test subset evaluation" },
+    { label: "Precision (Phishing)", value: modelInfo ? `${modelInfo.precision}%` : "98.78%", sub: "Correctly flagged fraud" },
+    { label: "Recall (Phishing)", value: modelInfo ? `${modelInfo.recall}%` : "99.13%", sub: "Total threats intercepted" },
+    { label: "F1 Score", value: modelInfo ? `${modelInfo.f1_score}%` : "98.95%", sub: "Harmonic balance" },
+    { label: "ROC-AUC Curve", value: modelInfo ? `${(modelInfo.roc_auc * 100).toFixed(2)}%` : "99.62%", sub: "Area under ROC curve" },
   ];
 
   return (
