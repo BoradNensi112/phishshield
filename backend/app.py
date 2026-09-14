@@ -123,6 +123,27 @@ def predict_url(req: PredictRequest):
     # Tier 1: Fast Allowlist
     if is_whitelisted(normalized_url):
         feats = extract_features(normalized_url)
+        # Log whitelisted legitimate scan to server-side scan history
+        try:
+            import datetime
+            scan_log = {
+                "id": f"scan_{int(datetime.datetime.now().timestamp() * 1000)}",
+                "url": normalized_url,
+                "prediction": "Legitimate",
+                "confidence": 99.9,
+                "risk_score": 0.1,
+                "risk_level": "Safe",
+                "tier": "Tier-1 Heuristic Whitelist",
+                "dns_status": "Active (Trusted CDN / Whitelist)",
+                "timestamp": datetime.datetime.now().isoformat() + "Z",
+                "threat_count": 0,
+                "user_id": (req.user_id or "").strip(),
+                "user_email": (req.user_email or "").strip().lower()
+            }
+            _log_scan(scan_log)
+        except Exception as e:
+            print(f"[-] Whitelist scan log error: {e}")
+
         return PredictResponse(
             url=normalized_url,
             prediction="Legitimate",
