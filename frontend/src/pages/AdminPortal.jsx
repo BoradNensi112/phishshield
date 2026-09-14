@@ -311,19 +311,9 @@ const AdminPortal = () => {
       {/* Action Notification Alert */}
       {actionNotice && (
         <div 
-          style={{
-            padding: "12px 18px",
-            borderRadius: "10px",
-            marginBottom: "20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            fontSize: "0.9rem",
-            fontWeight: "600",
-            background: actionNotice.type === "error" ? "rgba(244, 63, 94, 0.15)" : "rgba(16, 185, 129, 0.15)",
-            border: `1px solid ${actionNotice.type === "error" ? "rgba(244, 63, 94, 0.4)" : "rgba(16, 185, 129, 0.4)"}`,
-            color: actionNotice.type === "error" ? "#fb7185" : "#34d399"
-          }}
+          className={`admin-notice-banner ${
+            actionNotice.type === "error" ? "admin-notice-error" : "admin-notice-success"
+          }`}
         >
           {actionNotice.type === "error" ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
           <span>{actionNotice.msg}</span>
@@ -445,11 +435,11 @@ const AdminPortal = () => {
                 <thead>
                   <tr>
                     <th>Analyst Profile</th>
-                    <th>Assigned Role & Privilege</th>
+                    <th>Role & Privilege</th>
                     <th>Status</th>
-                    <th>Scans Performed</th>
+                    <th>Scans</th>
                     <th>Created</th>
-                    <th style={{ textAlign: "right" }}>Governance Actions</th>
+                    <th style={{ textAlign: "right", minWidth: "210px" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -463,13 +453,11 @@ const AdminPortal = () => {
                         <td>
                           <div className="admin-user-cell">
                             <div className="admin-user-avatar">{initial}</div>
-                            <div>
+                            <div className="admin-user-info">
                               <div className="admin-user-name">
-                                {u.name || "SOC Analyst"}
+                                <span>{u.name || "SOC Analyst"}</span>
                                 {isCurrentUser && (
-                                  <span style={{ fontSize: "0.72rem", marginLeft: "6px", color: "var(--cyan)", fontWeight: 800 }}>
-                                    (Current User)
-                                  </span>
+                                  <span className="current-user-pill">You</span>
                                 )}
                               </div>
                               <div className="admin-user-email">{u.email}</div>
@@ -514,33 +502,33 @@ const AdminPortal = () => {
                         </td>
 
                         <td>
-                          <div style={{ fontSize: "0.85rem" }}>
+                          <div style={{ fontSize: "0.85rem", whiteSpace: "nowrap" }}>
                             <strong>{u.total_scans || 0}</strong> scans
                             {(u.total_threats || 0) > 0 && (
-                              <span style={{ color: "#fb7185", marginLeft: "6px", fontSize: "0.78rem" }}>
+                              <span className="scans-threat-count">
                                 ({u.total_threats} threats)
                               </span>
                             )}
                           </div>
                         </td>
 
-                        <td className="text-sm text-muted">
+                        <td className="text-sm text-muted" style={{ whiteSpace: "nowrap" }}>
                           {formatDate(u.created_at)}
                         </td>
 
                         <td style={{ textAlign: "right" }}>
-                          <div className="admin-actions-cell" style={{ justifyContent: "flex-end" }}>
+                          <div className="admin-actions-cell">
                             {/* Reset Password Button */}
                             <button
-                              className="action-btn"
-                              style={{ background: "rgba(255, 255, 255, 0.06)", color: "var(--cyan)", border: "1px solid var(--border-color)" }}
+                              className="action-btn action-btn-pwd"
                               onClick={() => {
                                 setResetTargetUser(u);
                                 setNewResetPassword("");
                               }}
                               title="Reset Password for this user"
                             >
-                              <Key size={13} /> Password
+                              <Key size={13} />
+                              <span>Password</span>
                             </button>
 
                             {!isRoot && (
@@ -560,11 +548,13 @@ const AdminPortal = () => {
                                 >
                                   {u.status === "suspended" ? (
                                     <>
-                                      <UserCheck size={14} /> Activate
+                                      <UserCheck size={13} />
+                                      <span>Activate</span>
                                     </>
                                   ) : (
                                     <>
-                                      <UserX size={14} /> Suspend
+                                      <UserX size={13} />
+                                      <span>Suspend</span>
                                     </>
                                   )}
                                 </button>
@@ -574,12 +564,13 @@ const AdminPortal = () => {
                                   onClick={() => handleDeleteUser(u.email)}
                                   title="Permanently delete user"
                                 >
-                                  <Trash2 size={14} /> Delete
+                                  <Trash2 size={13} />
+                                  <span>Delete</span>
                                 </button>
                               </>
                             )}
                             {isRoot && (
-                              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic", padding: "4px 8px" }}>
+                              <span className="root-protected-badge">
                                 Root Protected
                               </span>
                             )}
@@ -756,7 +747,7 @@ const AdminPortal = () => {
             <div className="glass-card" style={{ padding: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
                 <Shield size={22} color="var(--cyan)" />
-                <h4 style={{ margin: 0, color: "#fff" }}>SOC Security Analyst</h4>
+                <h4 style={{ margin: 0, color: "var(--text-primary)" }}>SOC Security Analyst</h4>
               </div>
               <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "14px", lineHeight: "1.5" }}>
                 Standard operational security role for conducting real-time domain threat investigations.
@@ -772,7 +763,7 @@ const AdminPortal = () => {
             <div className="glass-card" style={{ padding: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
                 <ShieldAlert size={22} color="#c084fc" />
-                <h4 style={{ margin: 0, color: "#fff" }}>SOC Administrator</h4>
+                <h4 style={{ margin: 0, color: "var(--text-primary)" }}>SOC Administrator</h4>
               </div>
               <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "14px", lineHeight: "1.5" }}>
                 Privileged administrative role for centralized team governance and telemetry oversight.
@@ -795,8 +786,9 @@ const AdminPortal = () => {
           style={{
             position: "fixed",
             top: 0, left: 0, right: 0, bottom: 0,
-            background: "rgba(5, 8, 18, 0.85)",
+            background: "rgba(5, 8, 18, 0.75)",
             backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -807,11 +799,11 @@ const AdminPortal = () => {
         >
           <div 
             className="glass-card" 
-            style={{ width: "100%", maxWidth: "480px", padding: "28px" }}
+            style={{ width: "100%", maxWidth: "480px", padding: "28px", background: "var(--bg-surface)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <h3 style={{ margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 style={{ margin: 0, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
                 <UserPlus size={20} color="var(--cyan)" />
                 <span>Create New Analyst Account</span>
               </h3>
@@ -831,7 +823,6 @@ const AdminPortal = () => {
                 <input
                   type="text"
                   className="cyber-input"
-                  style={{ width: "100%", background: "#0e1526", border: "1px solid var(--border-color)", padding: "10px", borderRadius: "8px", color: "#fff" }}
                   placeholder="e.g. John Doe"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
@@ -846,7 +837,6 @@ const AdminPortal = () => {
                 <input
                   type="email"
                   className="cyber-input"
-                  style={{ width: "100%", background: "#0e1526", border: "1px solid var(--border-color)", padding: "10px", borderRadius: "8px", color: "#fff" }}
                   placeholder="e.g. jdoe@phishshield.com"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
@@ -861,7 +851,6 @@ const AdminPortal = () => {
                 <input
                   type="password"
                   className="cyber-input"
-                  style={{ width: "100%", background: "#0e1526", border: "1px solid var(--border-color)", padding: "10px", borderRadius: "8px", color: "#fff" }}
                   placeholder="At least 6 characters"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -877,7 +866,7 @@ const AdminPortal = () => {
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
                   className="admin-role-select"
-                  style={{ width: "100%", padding: "10px" }}
+                  style={{ width: "100%", padding: "10px", maxWidth: "100%" }}
                 >
                   {ROLES.map(r => (
                     <option key={r} value={r}>{r}</option>
@@ -912,8 +901,9 @@ const AdminPortal = () => {
           style={{
             position: "fixed",
             top: 0, left: 0, right: 0, bottom: 0,
-            background: "rgba(5, 8, 18, 0.85)",
+            background: "rgba(5, 8, 18, 0.75)",
             backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -924,11 +914,11 @@ const AdminPortal = () => {
         >
           <div 
             className="glass-card" 
-            style={{ width: "100%", maxWidth: "440px", padding: "28px" }}
+            style={{ width: "100%", maxWidth: "440px", padding: "28px", background: "var(--bg-surface)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 style={{ margin: 0, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
                 <Key size={20} color="var(--cyan)" />
                 <span>Reset User Password</span>
               </h3>
@@ -952,7 +942,6 @@ const AdminPortal = () => {
                 <input
                   type="password"
                   className="cyber-input"
-                  style={{ width: "100%", background: "#0e1526", border: "1px solid var(--border-color)", padding: "10px", borderRadius: "8px", color: "#fff" }}
                   placeholder="Enter at least 6 characters"
                   value={newResetPassword}
                   onChange={(e) => setNewResetPassword(e.target.value)}
