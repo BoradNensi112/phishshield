@@ -21,13 +21,14 @@
 }
 
 .nav-container {
-  max-width: 1300px;
+  max-width: 1600px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 clamp(16px, 2.5vw, 40px);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .nav-brand {
@@ -36,11 +37,12 @@
   gap: 12px;
   text-decoration: none;
   color: inherit;
+  flex-shrink: 0;
 }
 
 .logo-shield-wrapper {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(2, 132, 199, 0.3));
   border: 1px solid var(--cyan);
@@ -48,6 +50,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+  flex-shrink: 0;
 }
 
 .logo-shield-icon {
@@ -63,6 +66,7 @@
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.5px;
+  line-height: 1.15;
 }
 
 .brand-accent {
@@ -70,47 +74,56 @@
 }
 
 .brand-subtitle {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.4px;
   color: var(--text-secondary);
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 780px;
+  margin: 0 12px;
 }
 
 .nav-link-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
-  border-radius: 10px;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 9px;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
-  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .nav-link-item:hover {
   color: var(--cyan);
   background: var(--cyan-subtle);
+  transform: translateY(-1px);
 }
 
 .nav-link-item.active {
   color: var(--cyan);
-  background: var(--cyan-subtle);
-  border: 1px solid var(--border-color);
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.3);
   font-weight: 600;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
 }
 
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .api-status-pill {
@@ -1962,14 +1975,54 @@
    COMPREHENSIVE RESPONSIVE DESIGN SYSTEM (MOBILE, TABLET, DESKTOP)
    =================================================================== */
 
-/* 1. Large Tablets & Small Laptops (max-width: 1024px) */
-@media (max-width: 1024px) {
-  .hero-title { font-size: 2.6rem; }
-  .charts-grid { grid-template-columns: 1fr; }
+/* 1. Laptop / Medium Screen Nav Optimization (1025px to 1340px) */
+@media (min-width: 1025px) and (max-width: 1340px) {
+  .nav-container {
+    padding: 0 16px;
+    gap: 8px;
+  }
+  .nav-brand {
+    gap: 8px;
+  }
+  .brand-title {
+    font-size: 1.15rem;
+  }
+  .brand-subtitle {
+    font-size: 0.58rem;
+    letter-spacing: 1px;
+  }
+  .nav-links {
+    gap: 4px;
+    margin: 0 6px;
+  }
+  .nav-link-item {
+    padding: 7px 9px;
+    font-size: 0.82rem;
+    gap: 5px;
+  }
+  .nav-actions {
+    gap: 8px;
+  }
+  .nav-user-profile-badge {
+    padding: 3px 6px;
+    gap: 6px;
+  }
+  .user-display-name {
+    max-width: 80px;
+    font-size: 0.78rem;
+  }
+  .user-role-tag {
+    max-width: 95px;
+    font-size: 0.58rem;
+  }
+  .api-status-pill {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
 }
 
-/* 2. Tablets & Mobile Breakpoint (max-width: 860px) */
-@media (max-width: 860px) {
+/* 2. Large Tablets & Mobile Breakpoint (max-width: 1024px) */
+@media (max-width: 1024px) {
   /* Toggle Mobile Navbar */
   .desktop-only { display: none !important; }
   .desktop-status-pill { display: none !important; }
@@ -1978,6 +2031,9 @@
   /* Navbar Spacing & Brand */
   .nav-container { padding: 0 16px; }
   .brand-subtitle { display: none !important; }
+
+  .hero-title { font-size: 2.6rem; }
+  .charts-grid { grid-template-columns: 1fr; }
 
   /* Layout grids drop to 1 column */
   .result-body-grid {
@@ -2484,15 +2540,23 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 8px 4px 6px;
+  padding: 4px 10px 4px 6px;
   background: rgba(0, 240, 255, 0.08);
   border: 1px solid rgba(0, 240, 255, 0.3);
   border-radius: 30px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.nav-user-profile-badge:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
 }
 
 .user-avatar-circle {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--cyan);
   color: #030712;
@@ -2507,24 +2571,29 @@
   display: flex;
   flex-direction: column;
   line-height: 1.15;
+  text-align: left;
 }
 
 .user-display-name {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-primary);
-  max-width: 110px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .user-role-tag {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   color: var(--cyan);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav-logout-btn {
@@ -2532,17 +2601,18 @@
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 4px;
+  padding: 5px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .nav-logout-btn:hover {
   color: #ef4444;
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(239, 68, 68, 0.15);
 }
 
 /* Mobile Navigation Drawer Auth Section */

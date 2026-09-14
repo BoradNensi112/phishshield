@@ -1,0 +1,29 @@
+{
+  "analyst@phishshield.com": {
+    "id": "usr_analyst_01",
+    "name": "Nensi Borad",
+    "email": "analyst@phishshield.com",
+    "role": "Lead SOC Analyst",
+    "salt": "05957b84ed564ccc",
+    "hashed_password": "efcfdfb3bd9b38c3f866cd2bbf06d603d02984f7f0886cd8064b8130587116e3",
+    "created_at": "2026-01-01T00:00:00Z"
+  },
+  "admin@phishshield.com": {
+    "id": "usr_admin_01",
+    "name": "Security Operations Center Admin",
+    "email": "admin@phishshield.com",
+    "role": "Threat Intelligence Lead",
+    "salt": "79430fc395addab3",
+    "hashed_password": "36133228d9c2748c7ef0b5364034ecf97da815c38daa5a6be417aab48e7ad07a",
+    "created_at": "2026-01-01T00:00:00Z"
+  },
+  "boradnensi112@gmail.com": {
+    "id": "usr_ed39c9dd",
+    "name": "nensi",
+    "email": "boradnensi112@gmail.com",
+    "role": "SOC Security Analyst",
+    "salt": "02c4822b351efe77",
+    "hashed_password": "b173af4e3810f5cf3348c7230f69a2802ce50fa7cff42dc82f97dbf534217267",
+    "created_at": "2026-03-09T00:00:00Z"
+  }
+}

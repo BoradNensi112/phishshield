@@ -1,5 +1,29 @@
 [
   {
+    "id": "scan_1789363184573",
+    "url": "https://support-appleld.com.secureupdate.duilawyeryork.com/login",
+    "prediction": "Phishing",
+    "confidence": 96.5,
+    "risk_score": 96.5,
+    "risk_level": "High",
+    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
+    "dns_status": "Inactive / Unregistered Domain",
+    "timestamp": "2026-09-14T10:49:44.573129Z",
+    "threat_count": 5
+  },
+  {
+    "id": "scan_1789363183111",
+    "url": "http://174.139.46.123/ap/signin?paypal=verify&update=1",
+    "prediction": "Phishing",
+    "confidence": 96.5,
+    "risk_score": 96.5,
+    "risk_level": "High",
+    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
+    "dns_status": "Active (DNS Resolved)",
+    "timestamp": "2026-09-14T10:49:43.111981Z",
+    "threat_count": 5
+  },
+  {
     "id": "scan_1789187136962",
     "url": "https://www.kaggle.com/",
     "prediction": "Legitimate",
