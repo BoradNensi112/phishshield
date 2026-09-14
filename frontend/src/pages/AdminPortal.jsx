@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { 
   Users, Shield, ShieldCheck, ShieldAlert, Activity, Search, 
   Trash2, UserX, UserCheck, RefreshCw, Download, Filter, 
-  CheckCircle2, AlertTriangle, Database, Lock, Clock, Calendar, Globe
+  CheckCircle2, AlertTriangle, Database, Lock, Clock, Calendar, Globe,
+  UserPlus, Key, X, Check
 } from "lucide-react";
 import apiService from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -25,6 +26,19 @@ const AdminPortal = () => {
   const [userSearch, setUserSearch] = useState("");
   const [actionNotice, setActionNotice] = useState(null);
 
+  // Add User Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newRole, setNewRole] = useState(ROLES[0]);
+  const [isSubmittingNewUser, setIsSubmittingNewUser] = useState(false);
+
+  // Reset Password Modal State
+  const [resetTargetUser, setResetTargetUser] = useState(null);
+  const [newResetPassword, setNewResetPassword] = useState("");
+  const [isSubmittingReset, setIsSubmittingReset] = useState(false);
+
   // Global Scans State
   const [scans, setScans] = useState([]);
   const [scanLoading, setScanLoading] = useState(true);
@@ -34,7 +48,7 @@ const AdminPortal = () => {
 
   const showNotice = (msg, type = "success") => {
     setActionNotice({ msg, type });
-    setTimeout(() => setActionNotice(null), 4000);
+    setTimeout(() => setActionNotice(null), 4500);
   };
 
   // Fetch Users
@@ -45,7 +59,7 @@ const AdminPortal = () => {
       setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load users:", err);
-      // Client offline fallback
+      // Local fallback
       try {
         const local = JSON.parse(localStorage.getItem("phishshield_registered_users") || "{}");
         const list = Object.values(local).map(u => ({
@@ -54,7 +68,9 @@ const AdminPortal = () => {
           email: u.email,
           role: u.role || "SOC Security Analyst",
           status: u.status || "active",
-          created_at: u.created_at || "2026-01-01T00:00:00Z"
+          created_at: u.created_at || "2026-01-01T00:00:00Z",
+          total_scans: 0,
+          total_threats: 0
         }));
         setUsers(list);
       } catch (e) {
@@ -85,11 +101,66 @@ const AdminPortal = () => {
     loadScans();
   }, []);
 
+  // Create User
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    if (!newName.trim() || !newEmail.trim() || !newPassword) {
+      showNotice("All fields are required.", "error");
+      return;
+    }
+    if (newPassword.length < 6) {
+      showNotice("Password must be at least 6 characters.", "error");
+      return;
+    }
+
+    try {
+      setIsSubmittingNewUser(true);
+      await apiService.createAdminUser({
+        name: newName.trim(),
+        email: newEmail.trim().toLowerCase(),
+        password: newPassword,
+        role: newRole,
+        status: "active"
+      });
+      showNotice(`Analyst account "${newEmail}" created successfully.`);
+      setShowAddModal(false);
+      setNewName("");
+      setNewEmail("");
+      setNewPassword("");
+      await loadUsers();
+    } catch (err) {
+      showNotice(err.response?.data?.detail || "Failed to create user.", "error");
+    } finally {
+      setIsSubmittingNewUser(false);
+    }
+  };
+
+  // Reset Password
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!newResetPassword || newResetPassword.length < 6) {
+      showNotice("New password must be at least 6 characters.", "error");
+      return;
+    }
+
+    try {
+      setIsSubmittingReset(true);
+      await apiService.resetUserPassword(resetTargetUser.email, newResetPassword);
+      showNotice(`Password for ${resetTargetUser.email} has been updated.`);
+      setResetTargetUser(null);
+      setNewResetPassword("");
+    } catch (err) {
+      showNotice(err.response?.data?.detail || "Failed to reset password.", "error");
+    } finally {
+      setIsSubmittingReset(false);
+    }
+  };
+
   // Update Role
   const handleRoleChange = async (email, newRole) => {
     try {
       await apiService.updateUserRole(email, newRole);
-      showNotice(`Updated role for ${email} to "${newRole}".`);
+      showNotice(`Updated privilege for ${email} to "${newRole}".`);
       setUsers(prev => prev.map(u => u.email === email ? { ...u, role: newRole } : u));
     } catch (err) {
       showNotice(err.response?.data?.detail || "Failed to update role.", "error");
@@ -129,6 +200,21 @@ const AdminPortal = () => {
       setUsers(prev => prev.filter(u => u.email !== email));
     } catch (err) {
       showNotice(err.response?.data?.detail || "Failed to delete analyst account.", "error");
+    }
+  };
+
+  // Clear Global Scans
+  const handleClearGlobalScans = async () => {
+    if (scans.length === 0) return;
+    if (!window.confirm("Are you sure you want to purge all global scan records? This action cannot be undone.")) {
+      return;
+    }
+    try {
+      await apiService.clearAdminScans();
+      setScans([]);
+      showNotice("All organization-wide threat scan logs have been purged.");
+    } catch (err) {
+      showNotice("Failed to clear global scans.", "error");
     }
   };
 
@@ -199,14 +285,27 @@ const AdminPortal = () => {
   return (
     <div className="admin-portal-container">
       {/* Page Header */}
-      <div className="page-header">
-        <div className="admin-badge-banner">
-          <Shield size={13} /> SOC ROOT ADMINISTRATOR CONSOLE
+      <div className="page-header flex-header">
+        <div>
+          <div className="admin-badge-banner">
+            <Shield size={13} /> SOC ROOT ADMINISTRATOR CONSOLE
+          </div>
+          <h2>Enterprise Access & Governance Hub</h2>
+          <p>
+            Centralized SOC control: Provision new analysts, govern access privileges, suspend compromised profiles, reset passwords, and audit forensic telemetry.
+          </p>
         </div>
-        <h2>Enterprise Access & Governance Hub</h2>
-        <p>
-          Manage analyst accounts, govern SOC authorization privileges, review live organization-wide forensic scan activity, and audit platform security posture.
-        </p>
+
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="cyber-btn-primary btn-sm"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+          >
+            <UserPlus size={16} />
+            <span>+ Add New Analyst</span>
+          </button>
+        </div>
       </div>
 
       {/* Action Notification Alert */}
@@ -238,7 +337,7 @@ const AdminPortal = () => {
             <Users size={20} />
           </div>
           <div>
-            <div className="daily-stat-label">Total Registered Analysts</div>
+            <div className="daily-stat-label">Total Analysts</div>
             <div className="daily-stat-val">{users.length}</div>
           </div>
         </div>
@@ -272,7 +371,7 @@ const AdminPortal = () => {
             <Activity size={20} />
           </div>
           <div>
-            <div className="daily-stat-label">Global Scans Tracked</div>
+            <div className="daily-stat-label">Total Scans Audited</div>
             <div className="daily-stat-val mono">{scans.length}</div>
           </div>
         </div>
@@ -308,11 +407,11 @@ const AdminPortal = () => {
           <div className="admin-card-header">
             <div className="admin-card-title">
               <Users size={20} color="var(--cyan)" />
-              <span>Registered SOC Security Analysts</span>
+              <span>Registered SOC Security Analysts & Governance</span>
             </div>
 
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <div className="history-search-input-box" style={{ width: "260px" }}>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+              <div className="history-search-input-box" style={{ width: "240px" }}>
                 <Search size={16} className="search-icon" />
                 <input
                   type="text"
@@ -348,6 +447,7 @@ const AdminPortal = () => {
                     <th>Analyst Profile</th>
                     <th>Assigned Role & Privilege</th>
                     <th>Status</th>
+                    <th>Scans Performed</th>
                     <th>Created</th>
                     <th style={{ textAlign: "right" }}>Governance Actions</th>
                   </tr>
@@ -367,8 +467,8 @@ const AdminPortal = () => {
                               <div className="admin-user-name">
                                 {u.name || "SOC Analyst"}
                                 {isCurrentUser && (
-                                  <span style={{ fontSize: "0.72rem", marginLeft: "6px", color: "var(--cyan)" }}>
-                                    (You)
+                                  <span style={{ fontSize: "0.72rem", marginLeft: "6px", color: "var(--cyan)", fontWeight: 800 }}>
+                                    (Current User)
                                   </span>
                                 )}
                               </div>
@@ -383,6 +483,7 @@ const AdminPortal = () => {
                             value={u.role || "SOC Security Analyst"}
                             disabled={isRoot}
                             onChange={(e) => handleRoleChange(u.email, e.target.value)}
+                            title="Change user privilege role"
                           >
                             {ROLES.map((r) => (
                               <option key={r} value={r}>
@@ -412,12 +513,36 @@ const AdminPortal = () => {
                           </span>
                         </td>
 
+                        <td>
+                          <div style={{ fontSize: "0.85rem" }}>
+                            <strong>{u.total_scans || 0}</strong> scans
+                            {(u.total_threats || 0) > 0 && (
+                              <span style={{ color: "#fb7185", marginLeft: "6px", fontSize: "0.78rem" }}>
+                                ({u.total_threats} threats)
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
                         <td className="text-sm text-muted">
                           {formatDate(u.created_at)}
                         </td>
 
                         <td style={{ textAlign: "right" }}>
                           <div className="admin-actions-cell" style={{ justifyContent: "flex-end" }}>
+                            {/* Reset Password Button */}
+                            <button
+                              className="action-btn"
+                              style={{ background: "rgba(255, 255, 255, 0.06)", color: "var(--cyan)", border: "1px solid var(--border-color)" }}
+                              onClick={() => {
+                                setResetTargetUser(u);
+                                setNewResetPassword("");
+                              }}
+                              title="Reset Password for this user"
+                            >
+                              <Key size={13} /> Password
+                            </button>
+
                             {!isRoot && (
                               <>
                                 <button
@@ -447,15 +572,15 @@ const AdminPortal = () => {
                                 <button
                                   className="action-btn action-btn-delete"
                                   onClick={() => handleDeleteUser(u.email)}
-                                  title="Permanently remove analyst"
+                                  title="Permanently delete user"
                                 >
                                   <Trash2 size={14} /> Delete
                                 </button>
                               </>
                             )}
                             {isRoot && (
-                              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic" }}>
-                                Root System Admin
+                              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic", padding: "4px 8px" }}>
+                                Root Protected
                               </span>
                             )}
                           </div>
@@ -521,11 +646,21 @@ const AdminPortal = () => {
                 onClick={handleExportGlobalScans}
                 disabled={filteredScans.length === 0}
                 className="cyber-btn-secondary btn-sm"
+                title="Export all global scans as CSV"
               >
                 <Download size={15} /> Export CSV
               </button>
 
-              <button onClick={loadScans} className="cyber-btn-secondary btn-sm">
+              <button
+                onClick={handleClearGlobalScans}
+                disabled={scans.length === 0}
+                className="cyber-btn-secondary btn-sm clear-danger-btn"
+                title="Purge global audit logs"
+              >
+                <Trash2 size={15} /> Clear All
+              </button>
+
+              <button onClick={loadScans} className="cyber-btn-secondary btn-sm" title="Refresh scans">
                 <RefreshCw size={15} className={scanLoading ? "spin-icon" : ""} />
               </button>
             </div>
@@ -548,11 +683,11 @@ const AdminPortal = () => {
                 <thead>
                   <tr>
                     <th>Target URL</th>
-                    <th>Analyst</th>
+                    <th>Analyst Email</th>
                     <th>Verdict</th>
                     <th>Confidence</th>
                     <th>Risk Tier</th>
-                    <th>Date & Time</th>
+                    <th>Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -644,12 +779,204 @@ const AdminPortal = () => {
               </p>
               <ul style={{ fontSize: "0.82rem", color: "var(--text-secondary)", paddingLeft: "18px", lineHeight: "1.7" }}>
                 <li>Access the dedicated Administrator Control Hub (<code style={{ color: "var(--cyan)" }}>/admin</code>)</li>
-                <li>Inspect and audit all organization-wide threat detection records</li>
-                <li>Assign and elevate analyst privilege roles</li>
+                <li>Provision new analysts and reset user credentials</li>
+                <li>Assign and elevate analyst privilege roles instantly</li>
                 <li>Suspend compromised analyst accounts or activate approved users</li>
-                <li>Remove obsolete accounts and govern audit compliance</li>
+                <li>Inspect and audit all organization-wide threat detection records</li>
               </ul>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: ADD NEW USER */}
+      {showAddModal && (
+        <div 
+          style={{
+            position: "fixed",
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(5, 8, 18, 0.85)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "20px"
+          }}
+          onClick={() => setShowAddModal(false)}
+        >
+          <div 
+            className="glass-card" 
+            style={{ width: "100%", maxWidth: "480px", padding: "28px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h3 style={{ margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                <UserPlus size={20} color="var(--cyan)" />
+                <span>Create New Analyst Account</span>
+              </h3>
+              <button 
+                onClick={() => setShowAddModal(false)} 
+                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateUser} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600, display: "block", marginBottom: "6px" }}>
+                  Analyst Name:
+                </label>
+                <input
+                  type="text"
+                  className="cyber-input"
+                  style={{ width: "100%", background: "#0e1526", border: "1px solid var(--border-color)", padding: "10px", borderRadius: "8px", color: "#fff" }}
+                  placeholder="e.g. John Doe"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600, display: "block", marginBottom: "6px" }}>
+                  Work Email:
+                </label>
+                <input
+                  type="email"
+                  className="cyber-input"
+                  style={{ width: "100%", background: "#0e1526", border: "1px solid var(--border-color)", padding: "10px", borderRadius: "8px", color: "#fff" }}
+                  placeholder="e.g. jdoe@phishshield.com"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600, display: "block", marginBottom: "6px" }}>
+                  Initial Password:
+                </label>
+                <input
+                  type="password"
+                  className="cyber-input"
+                  style={{ width: "100%", background: "#0e1526", border: "1px solid var(--border-color)", padding: "10px", borderRadius: "8px", color: "#fff" }}
+                  placeholder="At least 6 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600, display: "block", marginBottom: "6px" }}>
+                  Privilege Role:
+                </label>
+                <select
+                  value={newRole}
+                  onChange={(e) => setNewRole(e.target.value)}
+                  className="admin-role-select"
+                  style={{ width: "100%", padding: "10px" }}
+                >
+                  {ROLES.map(r => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "14px" }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="cyber-btn-secondary btn-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingNewUser}
+                  className="cyber-btn-primary btn-sm"
+                >
+                  {isSubmittingNewUser ? "Creating Profile..." : "Create Analyst Account"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: RESET PASSWORD */}
+      {resetTargetUser && (
+        <div 
+          style={{
+            position: "fixed",
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(5, 8, 18, 0.85)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "20px"
+          }}
+          onClick={() => setResetTargetUser(null)}
+        >
+          <div 
+            className="glass-card" 
+            style={{ width: "100%", maxWidth: "440px", padding: "28px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Key size={20} color="var(--cyan)" />
+                <span>Reset User Password</span>
+              </h3>
+              <button 
+                onClick={() => setResetTargetUser(null)} 
+                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "16px" }}>
+              Setting new authentication password for <strong>{resetTargetUser.name}</strong> ({resetTargetUser.email}).
+            </p>
+
+            <form onSubmit={handleResetPassword} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: 600, display: "block", marginBottom: "6px" }}>
+                  New Access Password:
+                </label>
+                <input
+                  type="password"
+                  className="cyber-input"
+                  style={{ width: "100%", background: "#0e1526", border: "1px solid var(--border-color)", padding: "10px", borderRadius: "8px", color: "#fff" }}
+                  placeholder="Enter at least 6 characters"
+                  value={newResetPassword}
+                  onChange={(e) => setNewResetPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "14px" }}>
+                <button
+                  type="button"
+                  onClick={() => setResetTargetUser(null)}
+                  className="cyber-btn-secondary btn-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReset}
+                  className="cyber-btn-primary btn-sm"
+                >
+                  {isSubmittingReset ? "Updating..." : "Save New Password"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

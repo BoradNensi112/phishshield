@@ -56,6 +56,11 @@ export const apiService = {
     return response.data;
   },
 
+  createAdminUser: async (userData) => {
+    const response = await apiClient.post("/api/admin/users", userData);
+    return response.data;
+  },
+
   updateUserRole: async (email, role) => {
     const response = await apiClient.put(`/api/admin/users/${encodeURIComponent(email)}/role`, { role });
     return response.data;
@@ -66,6 +71,11 @@ export const apiService = {
     return response.data;
   },
 
+  resetUserPassword: async (email, new_password) => {
+    const response = await apiClient.put(`/api/admin/users/${encodeURIComponent(email)}/password`, { new_password });
+    return response.data;
+  },
+
   deleteUser: async (email) => {
     const response = await apiClient.delete(`/api/admin/users/${encodeURIComponent(email)}`);
     return response.data;
@@ -73,6 +83,11 @@ export const apiService = {
 
   getAdminScans: async () => {
     const response = await apiClient.get("/api/admin/scans");
+    return response.data;
+  },
+
+  clearAdminScans: async () => {
+    const response = await apiClient.delete("/api/admin/scans");
     return response.data;
   },
 

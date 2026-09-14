@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, quickDemoLogin, isAuthenticated, currentUser } = useAuth();
+  const { login, quickDemoLogin, quickAdminLogin, isAuthenticated, currentUser } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,6 +41,11 @@ const Login = () => {
   const handleDemoLogin = () => {
     quickDemoLogin("Lead SOC Analyst");
     navigate(redirectPath);
+  };
+
+  const handleAdminLogin = () => {
+    quickAdminLogin();
+    navigate("/admin");
   };
 
   return (
@@ -81,19 +86,37 @@ const Login = () => {
           <div className="demo-login-box">
             <div className="demo-box-header">
               <Zap size={16} className="demo-zap-icon" />
-              <span>Instant Presentation Access</span>
+              <span>Instant Presentation & Viva Access</span>
             </div>
             <p className="demo-box-text">
-              Testing or evaluating? Tap below to bypass credential entry with pre-configured Lead SOC Analyst privileges.
+              Testing or evaluating? Tap below to bypass credential entry with pre-configured SOC privileges.
             </p>
-            <button
-              type="button"
-              onClick={handleDemoLogin}
-              className="demo-login-btn"
-            >
-              <ShieldCheck size={18} />
-              <span>1-Click Sign In as Lead Analyst</span>
-            </button>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "10px" }}>
+              <button
+                type="button"
+                onClick={handleAdminLogin}
+                className="demo-login-btn"
+                style={{ 
+                  flex: 1, 
+                  minWidth: "200px", 
+                  background: "rgba(168, 85, 247, 0.18)", 
+                  borderColor: "rgba(168, 85, 247, 0.5)", 
+                  color: "#d8b4fe" 
+                }}
+              >
+                <ShieldAlert size={18} />
+                <span>1-Click SOC Administrator</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                className="demo-login-btn"
+                style={{ flex: 1, minWidth: "200px" }}
+              >
+                <ShieldCheck size={18} />
+                <span>1-Click Lead Analyst</span>
+              </button>
+            </div>
           </div>
 
           <div className="auth-divider">

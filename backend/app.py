@@ -4,7 +4,7 @@ import json
 import joblib
 import socket
 import numpy as np
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -115,6 +115,16 @@ def predict_url(req: PredictRequest):
     raw_input = (req.url or "").strip()
     if not raw_input:
         raise HTTPException(status_code=400, detail="URL cannot be empty.")
+
+    # Enforce account suspension
+    if req.user_email:
+        users = _load_users()
+        u = users.get(req.user_email.strip().lower())
+        if u and u.get("status") == "suspended":
+            raise HTTPException(
+                status_code=403,
+                detail="Your analyst account has been suspended by the SOC Administrator. URL scanning is disabled."
+            )
 
     normalized_url = sanitize_url(raw_input)
     parsed = urlparse(normalized_url)
@@ -287,6 +297,10 @@ def _log_scan(scan_data: dict):
             scans = []
     scans.insert(0, scan_data)
     scans = scans[:200]
+    _save_scans(scans)
+
+def _save_scans(scans: list):
+    os.makedirs(DATA_DIR, exist_ok=True)
     with open(SCANS_FILE, "w", encoding="utf-8") as f:
         json.dump(scans, f, indent=2)
 
@@ -458,8 +472,21 @@ def login_user(req: LoginRequest):
 @app.get("/api/admin/users")
 def get_admin_users():
     users = _load_users()
+    all_scans = _load_scans()
+    
+    # Calculate telemetry per user
+    scan_counts = {}
+    threat_counts = {}
+    for s in all_scans:
+        em = (s.get("user_email") or "").strip().lower()
+        if em:
+            scan_counts[em] = scan_counts.get(em, 0) + 1
+            if s.get("prediction") == "Phishing":
+                threat_counts[em] = threat_counts.get(em, 0) + 1
+
     sanitized = []
     for email, u in users.items():
+        em = email.strip().lower()
         sanitized.append({
             "id": u.get("id"),
             "name": u.get("name"),
@@ -467,8 +494,58 @@ def get_admin_users():
             "role": u.get("role", "SOC Security Analyst"),
             "status": u.get("status", "active"),
             "created_at": u.get("created_at", "2026-01-01T00:00:00Z"),
+            "total_scans": scan_counts.get(em, 0),
+            "total_threats": threat_counts.get(em, 0)
         })
     return sanitized
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str = "SOC Security Analyst"
+    status: str = "active"
+
+@app.post("/api/admin/users")
+def create_admin_user(req: CreateUserRequest):
+    email = req.email.strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="A valid email address is required.")
+    if len(req.name.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Name must be at least 2 characters.")
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+
+    users = _load_users()
+    if email in users:
+        raise HTTPException(status_code=400, detail="Analyst profile with this email already exists.")
+
+    salt = secrets.token_hex(8)
+    import datetime
+    user_id = f"usr_{secrets.token_hex(4)}"
+    new_user = {
+        "id": user_id,
+        "name": req.name.strip(),
+        "email": email,
+        "role": req.role.strip(),
+        "status": req.status.strip().lower(),
+        "salt": salt,
+        "hashed_password": _hash_password(req.password, salt),
+        "created_at": datetime.datetime.now().isoformat() + "Z"
+    }
+    users[email] = new_user
+    _save_users(users)
+    return {
+        "success": True,
+        "message": f"Analyst profile {email} created successfully.",
+        "user": {
+            "id": user_id,
+            "name": req.name.strip(),
+            "email": email,
+            "role": req.role.strip(),
+            "status": req.status.strip().lower()
+        }
+    }
 
 class RoleUpdateRequest(BaseModel):
     role: str
@@ -476,7 +553,7 @@ class RoleUpdateRequest(BaseModel):
 @app.put("/api/admin/users/{email}/role")
 def update_user_role(email: str, req: RoleUpdateRequest):
     users = _load_users()
-    clean_email = email.strip().lower()
+    clean_email = unquote(unquote(email)).strip().lower()
     if clean_email not in users:
         raise HTTPException(status_code=404, detail="Analyst profile not found.")
     users[clean_email]["role"] = req.role.strip()
@@ -489,7 +566,7 @@ class StatusUpdateRequest(BaseModel):
 @app.put("/api/admin/users/{email}/status")
 def update_user_status(email: str, req: StatusUpdateRequest):
     users = _load_users()
-    clean_email = email.strip().lower()
+    clean_email = unquote(unquote(email)).strip().lower()
     if clean_email not in users:
         raise HTTPException(status_code=404, detail="Analyst profile not found.")
     if clean_email == "admin@phishshield.com":
@@ -501,10 +578,27 @@ def update_user_status(email: str, req: StatusUpdateRequest):
     _save_users(users)
     return {"success": True, "message": f"Account status set to {new_status}."}
 
+class PasswordResetRequest(BaseModel):
+    new_password: str
+
+@app.put("/api/admin/users/{email}/password")
+def reset_user_password(email: str, req: PasswordResetRequest):
+    users = _load_users()
+    clean_email = unquote(unquote(email)).strip().lower()
+    if clean_email not in users:
+        raise HTTPException(status_code=404, detail="Analyst profile not found.")
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+    salt = secrets.token_hex(8)
+    users[clean_email]["salt"] = salt
+    users[clean_email]["hashed_password"] = _hash_password(req.new_password, salt)
+    _save_users(users)
+    return {"success": True, "message": f"Password for {clean_email} updated successfully."}
+
 @app.delete("/api/admin/users/{email}")
 def delete_user(email: str):
     users = _load_users()
-    clean_email = email.strip().lower()
+    clean_email = unquote(unquote(email)).strip().lower()
     if clean_email not in users:
         raise HTTPException(status_code=404, detail="Analyst profile not found.")
     if clean_email == "admin@phishshield.com":
@@ -516,6 +610,11 @@ def delete_user(email: str):
 @app.get("/api/admin/scans")
 def get_admin_scans():
     return _load_scans()
+
+@app.delete("/api/admin/scans")
+def clear_admin_scans():
+    _save_scans([])
+    return {"success": True, "message": "All global threat scan logs cleared."}
 
 
 # Serve Frontend SPA in Production if built

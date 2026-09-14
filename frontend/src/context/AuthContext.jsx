@@ -176,9 +176,42 @@ export const AuthProvider = ({ children }) => {
       name: "Nensi Borad",
       email: "analyst@phishshield.com",
       role: role,
+      status: "active"
     };
     setCurrentUser(demoAnalyst);
     return demoAnalyst;
+  };
+
+  const quickAdminLogin = () => {
+    const demoAdmin = {
+      id: "usr_admin_01",
+      name: "Security Operations Center Admin",
+      email: "admin@phishshield.com",
+      role: "SOC Administrator",
+      status: "active",
+      is_admin: true
+    };
+    setCurrentUser(demoAdmin);
+    return demoAdmin;
+  };
+
+  const refreshCurrentUser = async () => {
+    if (!currentUser?.email) return;
+    try {
+      const all = await apiService.getAdminUsers();
+      const me = all.find(u => u.email?.toLowerCase() === currentUser.email?.toLowerCase());
+      if (me) {
+        if (me.status === "suspended") {
+          logout();
+          return;
+        }
+        if (me.role !== currentUser.role) {
+          setCurrentUser(prev => ({ ...prev, role: me.role }));
+        }
+      }
+    } catch {
+      // background refresh fallback
+    }
   };
 
   const logout = () => {
@@ -191,6 +224,7 @@ export const AuthProvider = ({ children }) => {
       currentUser.role === "SOC Administrator" ||
       currentUser.role === "Admin" ||
       currentUser.email === "admin@phishshield.com" ||
+      currentUser.email === "neni112@gmail.com" ||
       currentUser.is_admin === true ||
       currentUser.role === "Threat Intelligence Lead"
     )
@@ -207,6 +241,8 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         quickDemoLogin,
+        quickAdminLogin,
+        refreshCurrentUser,
       }}
     >
       {children}

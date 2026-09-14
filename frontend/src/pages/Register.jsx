@@ -8,6 +8,8 @@ import { useAuth } from "../context/AuthContext";
 
 const ROLES = [
   { title: "SOC Security Analyst", desc: "Tier 1/2 Incident Detection & Monitoring" },
+  { title: "SOC Administrator", desc: "System Governance & Team Management" },
+  { title: "Lead SOC Analyst", desc: "Advanced Forensic Incident Handling" },
   { title: "Threat Intelligence Researcher", desc: "Threat Actor & Campaign Attribution" },
   { title: "Cybersecurity Auditor", desc: "Compliance, Forensics & Risk Inspection" },
   { title: "Incident Response Engineer", desc: "Active Exploitation Containment & Mitigation" },
