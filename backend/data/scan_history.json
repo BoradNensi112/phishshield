@@ -1,5 +1,33 @@
 [
   {
+    "id": "scan_1789370634776",
+    "url": "http://174.139.46.123/ap/signin?paypal=verify&token=abc",
+    "prediction": "Phishing",
+    "confidence": 96.5,
+    "risk_score": 96.5,
+    "risk_level": "High",
+    "tier": "Tier-2 Hybrid Security Engine (Heuristics + Random Forest)",
+    "dns_status": "Active (DNS Resolved)",
+    "timestamp": "2026-09-14T12:53:54.776183Z",
+    "threat_count": 5,
+    "user_id": "usr_39697049",
+    "user_email": "audit_user_final@phishshield.com"
+  },
+  {
+    "id": "scan_1789370634701",
+    "url": "https://www.youtube.com",
+    "prediction": "Legitimate",
+    "confidence": 99.9,
+    "risk_score": 0.1,
+    "risk_level": "Safe",
+    "tier": "Tier-1 Heuristic Whitelist",
+    "dns_status": "Active (Trusted CDN / Whitelist)",
+    "timestamp": "2026-09-14T12:53:54.701076Z",
+    "threat_count": 0,
+    "user_id": "usr_39697049",
+    "user_email": "audit_user_final@phishshield.com"
+  },
+  {
     "id": "scan_1789368628526",
     "url": "https://www.google.com/search?q=cybersecurity",
     "prediction": "Legitimate",
