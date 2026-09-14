@@ -31,20 +31,28 @@ const ScanHistory = () => {
   const loadHistory = async () => {
     setLoading(true);
     try {
-      // 1. Fetch from server with user-isolated email filter
-      const emailFilter = isAdmin ? null : (currentUser?.email || null);
+      const currEmail = (currentUser?.email || "").toLowerCase().trim();
+      const currId = currentUser?.id || null;
+
+      // 1. Fetch from server with logged-in user email filter
       let serverScans = [];
       try {
-        serverScans = await apiService.getScans(emailFilter);
+        serverScans = await apiService.getScans(currEmail || null);
       } catch (e) {
         console.warn("Server scans fetch failed, falling back to local storage:", e);
       }
 
-      // 2. Fetch from localStorage for offline/client resilience
-      const localStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
+      // 2. Fetch from localStorage and strictly isolate by current user
+      const rawStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
+      const userStored = rawStored.filter((item) => {
+        const itemEmail = (item.user_email || "").toLowerCase().trim();
+        if (currEmail && itemEmail === currEmail) return true;
+        if (currId && item.user_id === currId) return true;
+        return false;
+      });
 
       // Merge both sources with deduplication by ID or (url + timestamp)
-      const combined = [...(Array.isArray(serverScans) ? serverScans : []), ...localStored];
+      const combined = [...(Array.isArray(serverScans) ? serverScans : []), ...userStored];
       const seen = new Set();
       const deduped = [];
       for (const item of combined) {
@@ -55,17 +63,13 @@ const ScanHistory = () => {
         }
       }
 
-      // User isolation security rule: Non-admin users strictly see ONLY their own scans
-      const filteredByUser = isAdmin
-        ? deduped
-        : deduped.filter((item) => {
-            const itemEmail = (item.user_email || "").toLowerCase().trim();
-            const currEmail = (currentUser?.email || "").toLowerCase().trim();
-            if (currEmail && itemEmail === currEmail) return true;
-            if (currentUser?.id && item.user_id === currentUser.id) return true;
-            // If completely untagged and user is logged in, hide foreign records
-            return false;
-          });
+      // Strict user isolation rule: Every user sees ONLY their own scans
+      const filteredByUser = deduped.filter((item) => {
+        const itemEmail = (item.user_email || "").toLowerCase().trim();
+        if (currEmail && itemEmail === currEmail) return true;
+        if (currId && item.user_id === currId) return true;
+        return false;
+      });
 
       // Sort newest first
       filteredByUser.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
@@ -79,7 +83,7 @@ const ScanHistory = () => {
 
   useEffect(() => {
     loadHistory();
-  }, [currentUser, isAdmin]);
+  }, [currentUser]);
 
   const handleDelete = (id) => {
     const updated = history.filter((item) => item.id !== id);
@@ -96,23 +100,16 @@ const ScanHistory = () => {
   };
 
   const handleClearAll = () => {
-    const confirmMsg = isAdmin
-      ? "Are you sure you want to clear this audit view?"
-      : "Are you sure you want to clear your private scan records?";
+    const confirmMsg = "Are you sure you want to clear your private scan records?";
     if (window.confirm(confirmMsg)) {
       setHistory([]);
       try {
         const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
-        // Only remove current user's scans from local storage
-        if (isAdmin) {
-          localStorage.removeItem("phishshield_history");
-        } else {
-          const currEmail = (currentUser?.email || "").toLowerCase().trim();
-          const retained = stored.filter(
-            (item) => (item.user_email || "").toLowerCase().trim() !== currEmail
-          );
-          localStorage.setItem("phishshield_history", JSON.stringify(retained));
-        }
+        const currEmail = (currentUser?.email || "").toLowerCase().trim();
+        const retained = stored.filter(
+          (item) => (item.user_email || "").toLowerCase().trim() !== currEmail
+        );
+        localStorage.setItem("phishshield_history", JSON.stringify(retained));
       } catch (e) {
         console.error(e);
       }
@@ -258,16 +255,20 @@ const ScanHistory = () => {
         <div>
           <div className="header-badge">FORENSIC AUDIT TRAIL</div>
           <h2>URL Threat Scan History</h2>
-          <p>
-            {isAdmin ? (
-              <span className="admin-view-tag">
-                <Shield size={14} /> Administrator Mode: Viewing global SOC telemetry logs.
-              </span>
-            ) : (
-              <span className="user-view-tag">
-                <User size={14} /> Isolated Analyst History: Viewing private scans for{" "}
-                <strong>{currentUser?.name || currentUser?.email}</strong>.
-              </span>
+          <p style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <span className="user-view-tag">
+              <User size={14} /> Analyst History: Viewing personal scans for{" "}
+              <strong>{currentUser?.name || currentUser?.email || "Analyst"}</strong>.
+            </span>
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/admin")}
+                className="admin-view-tag"
+                style={{ cursor: "pointer", border: "1px dashed var(--cyan)", background: "rgba(14, 165, 233, 0.1)" }}
+                title="View All Users' Global Audit Logs in Admin Console"
+              >
+                <Shield size={13} /> View Global Multi-User Audit in Admin Portal →
+              </button>
             )}
           </p>
         </div>
@@ -451,7 +452,6 @@ const ScanHistory = () => {
               <thead>
                 <tr>
                   <th>Target URL</th>
-                  {isAdmin && <th>Analyst</th>}
                   <th>Verdict</th>
                   <th>Confidence</th>
                   <th>Risk Tier</th>
@@ -479,15 +479,6 @@ const ScanHistory = () => {
                         </button>
                       </div>
                     </td>
-
-                    {isAdmin && (
-                      <td className="text-sm">
-                        <span className="analyst-tag-cell" title={`Audited Analyst: ${row.user_email || row.user_id || "Anonymous"}`}>
-                          <User size={11} />
-                          <span>{row.user_email || row.user_id || "Anonymous"}</span>
-                        </span>
-                      </td>
-                    )}
 
                     <td>
                       <span
