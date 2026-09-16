@@ -225,14 +225,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isAdmin = Boolean(
-    currentUser && (
-      currentUser.role === "SOC Administrator" ||
-      currentUser.role === "Admin" ||
-      currentUser.email === "admin@phishshield.com" ||
-      currentUser.email === "neni112@gmail.com" ||
-      currentUser.is_admin === true ||
-      currentUser.role === "Threat Intelligence Lead"
-    )
+    currentUser && currentUser.is_admin === true
   );
 
   return (

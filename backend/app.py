@@ -49,6 +49,10 @@ def get_current_admin(credentials: HTTPAuthorizationCredentials | None = Depends
     if not payload:
         raise HTTPException(status_code=401, detail="Session expired or invalid token. Please log in again.")
 
+    # Strictly verify that this token was issued from an authenticated Administrator login
+    if not payload.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Clearance Denied: Requires SOC Administrator clearance.")
+
     email = payload.get("email", "").lower()
     user = database.get_user_by_email(email)
     if not user:
@@ -57,13 +61,8 @@ def get_current_admin(credentials: HTTPAuthorizationCredentials | None = Depends
         raise HTTPException(status_code=403, detail="Your account has been suspended.")
 
     role = (user.get("role") or "").lower()
-    is_admin = (
-        "admin" in role
-        or "lead" in role
-        or email == "admin@phishshield.com"
-        or email == "neni112@gmail.com"
-    )
-    if not is_admin:
+    is_admin_eligible = "admin" in role or "lead" in role or email == "admin@phishshield.com"
+    if not is_admin_eligible:
         raise HTTPException(status_code=403, detail="Clearance Denied: Requires SOC Administrator privileges.")
     return user
 
@@ -496,26 +495,25 @@ def login_user(req: LoginRequest):
         database.update_user_password(email, new_salt, new_hash)
 
     role = (user.get("role") or "").lower()
-    is_admin = (
-        "admin" in role
-        or "lead" in role
-        or email == "admin@phishshield.com"
-        or email == "neni112@gmail.com"
-    )
+    is_admin_eligible = "admin" in role or "lead" in role or email == "admin@phishshield.com"
 
-    # If logging in as Administrator, strictly verify Admin Secret Key and privileges
+    # Strict isolation: session is ONLY admin if user chose 'admin' mode AND entered valid secret key
     if req.role_mode == "admin":
         if not req.admin_secret_key or req.admin_secret_key.strip() != ADMIN_MASTER_KEY:
             raise HTTPException(status_code=401, detail="Incorrect credentials")
-        if not is_admin:
+        if not is_admin_eligible:
             raise HTTPException(status_code=401, detail="Incorrect credentials")
+        session_is_admin = True
+    else:
+        # Standard user login: NEVER grant admin session
+        session_is_admin = False
 
     token = security.create_access_token({
         "sub": user["id"],
         "email": user["email"],
         "name": user["name"],
-        "role": user["role"],
-        "is_admin": is_admin and (req.role_mode == "admin" or is_admin)
+        "role": "SOC Administrator" if session_is_admin else user["role"],
+        "is_admin": session_is_admin
     })
 
     return {
@@ -525,9 +523,9 @@ def login_user(req: LoginRequest):
             "id": user.get("id"),
             "name": user.get("name"),
             "email": user.get("email"),
-            "role": user.get("role", "SOC Security Analyst"),
+            "role": "SOC Administrator" if session_is_admin else user.get("role", "SOC Security Analyst"),
             "status": user.get("status", "active"),
-            "is_admin": is_admin
+            "is_admin": session_is_admin
         },
         "token": token
     }
