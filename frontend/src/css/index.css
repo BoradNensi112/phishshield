@@ -2242,16 +2242,32 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  background: #050811;
-  border-radius: 12px;
-  padding: 12px;
-  border: 1px solid var(--border-color);
+  align-items: center;
+  background: #001830;
+  border-radius: 14px;
+  padding: 10px;
+  border: 1.5px solid rgba(73, 118, 159, 0.35);
+  box-shadow: 0 4px 18px rgba(0, 24, 48, 0.18);
+  overflow: hidden;
+}
+
+[data-theme="light"] .cm-image-wrapper {
+  background: #001830;
+  border-color: rgba(73, 118, 159, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 29, 57, 0.15);
+}
+
+[data-theme="dark"] .cm-image-wrapper {
+  background: #001830;
+  border-color: var(--border-color);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
 }
 
 .cm-image {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: 10px;
+  display: block;
 }
 
 .cm-breakdown-table {
@@ -2262,28 +2278,58 @@
 
 .cm-stat-item {
   background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 12px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .cm-stat-item {
+  background: #ffffff;
+  border-color: rgba(73, 118, 159, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 29, 57, 0.04);
+}
+
+.cm-stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 29, 57, 0.08);
+}
+
+.tn-box {
+  border-left: 4px solid #10b981 !important;
+}
+
+.tp-box {
+  border-left: 4px solid #10b981 !important;
+}
+
+.fp-box {
+  border-left: 4px solid #f59e0b !important;
+}
+
+.fn-box {
+  border-left: 4px solid #f43f5e !important;
 }
 
 .cm-stat-label {
   font-size: 0.75rem;
   color: var(--text-muted);
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .cm-stat-val {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 800;
   font-family: 'JetBrains Mono', monospace;
 }
 
 .cm-stat-desc {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-secondary);
 }
 
