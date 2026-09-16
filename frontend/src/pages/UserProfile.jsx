@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   User, Shield, ShieldCheck, ShieldAlert, Key, Lock, 
-  Calendar, CheckCircle2, AlertTriangle, RefreshCw, Save, Activity
+  Calendar, CheckCircle2, AlertTriangle, RefreshCw, Save, Activity,
+  Database, Radar, History, ArrowRight, Check, Info, Mail
 } from "lucide-react";
 import apiService from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const UserProfile = () => {
-  const { currentUser, login } = useAuth();
+  const { currentUser } = useAuth();
 
   const [profileData, setProfileData] = useState(null);
   const [stats, setStats] = useState({
@@ -126,7 +128,7 @@ const UserProfile = () => {
   };
 
   const formatDate = (isoStr) => {
-    if (!isoStr) return "Jan 2026";
+    if (!isoStr) return "Sept 2026";
     try {
       const d = new Date(isoStr);
       return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -135,14 +137,19 @@ const UserProfile = () => {
     }
   };
 
+  const displayName = profileData?.name || currentUser?.name || "Analyst";
+  const displayEmail = profileData?.email || currentUser?.email || "analyst@phishshield.com";
+  const displayRole = profileData?.role || currentUser?.role || "SOC Security Analyst";
+  const userInitial = displayName.charAt(0).toUpperCase();
+
   return (
-    <div className="history-page-container">
+    <div className="profile-page-container">
       {/* Header */}
       <div className="page-header flex-header">
         <div>
           <div className="header-badge">SECURITY OPERATIONS CLEARANCE</div>
           <h2>Analyst Identity & Settings</h2>
-          <p>Manage your SOC credentials, personal profile, and review your forensic detection metrics.</p>
+          <p>Manage your SOC credentials, personal profile details, and review your threat forensics activity.</p>
         </div>
 
         <button onClick={loadProfile} className="cyber-btn-secondary btn-sm" title="Refresh Profile">
@@ -152,126 +159,112 @@ const UserProfile = () => {
       </div>
 
       {/* User Identity Banner Card */}
-      <div className="glass-card" style={{ padding: "24px", marginBottom: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
-          <div style={{
-            width: "68px",
-            height: "68px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--cyan, #00f0ff), #38bdf8)",
-            color: "#070b14",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "1.75rem",
-            fontWeight: "800",
-            boxShadow: "0 0 20px rgba(0, 240, 255, 0.35)",
-            flexShrink: 0
-          }}>
-            {(profileData?.name || currentUser?.name || "A")[0].toUpperCase()}
+      <div className="profile-identity-card glass-card">
+        <div className="profile-identity-layout">
+          <div className="profile-avatar-box">
+            {userInitial}
           </div>
 
-          <div style={{ flex: 1, minWidth: "220px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "6px" }}>
-              <h3 style={{ margin: 0, fontSize: "1.35rem", fontWeight: "700" }}>
-                {profileData?.name || currentUser?.name || "Analyst"}
-              </h3>
-              <span className="badge badge-safe" style={{ fontSize: "0.75rem" }}>
-                <ShieldCheck size={12} /> {profileData?.role || currentUser?.role || "SOC Security Analyst"}
+          <div className="profile-info-block">
+            <div className="profile-name-row">
+              <h3 className="profile-display-title">{displayName}</h3>
+              <span className="profile-role-badge">
+                <ShieldCheck size={13} /> {displayRole}
               </span>
-              <span className="badge" style={{ 
-                background: "rgba(16, 185, 129, 0.12)", 
-                color: "#10b981", 
-                border: "1px solid rgba(16, 185, 129, 0.3)", 
-                fontSize: "0.72rem" 
-              }}>
+              <span className="profile-status-badge">
                 ● Active Clearance
               </span>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "18px", color: "var(--text-secondary)", fontSize: "0.86rem", flexWrap: "wrap" }}>
-              <span>Work Email: <strong style={{ color: "var(--text-primary)" }}>{profileData?.email || currentUser?.email}</strong></span>
-              <span>•</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                <Calendar size={14} /> Registered: {formatDate(profileData?.created_at)}
+            <div className="profile-meta-row">
+              <span className="profile-meta-item">
+                <Mail size={14} className="text-sage" />
+                <span>Work Email: <strong>{displayEmail}</strong></span>
               </span>
               <span>•</span>
-              <span>Storage: <strong style={{ color: "#38bdf8" }}>SQLite ACID Database</strong></span>
+              <span className="profile-meta-item">
+                <Calendar size={14} className="text-sage" />
+                <span>Member Since: <strong>{formatDate(profileData?.created_at)}</strong></span>
+              </span>
+              <span>•</span>
+              <span className="profile-meta-item">
+                <Database size={14} className="text-sage" />
+                <span>Persistence: <strong>SQLite ACID Engine</strong></span>
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Personal Telemetry KPI Cards */}
-      <div className="daily-stats-grid" style={{ marginBottom: "28px" }}>
-        <div className="daily-stat-card glass-card">
-          <div className="daily-stat-icon-wrap icon-blue">
-            <Activity size={20} />
+      {/* Personal Forensic KPI Cards */}
+      <div className="profile-stats-grid">
+        <div className="profile-stat-card glass-card">
+          <div className="profile-stat-icon icon-sage">
+            <Activity size={22} />
           </div>
-          <div>
-            <div className="daily-stat-label">Personal Scans</div>
-            <div className="daily-stat-val">{stats.total_scans}</div>
-          </div>
-        </div>
-
-        <div className="daily-stat-card glass-card">
-          <div className="daily-stat-icon-wrap icon-red">
-            <ShieldAlert size={20} />
-          </div>
-          <div>
-            <div className="daily-stat-label">Malicious Threats</div>
-            <div className="daily-stat-val danger-text">{stats.phishing_count}</div>
+          <div className="profile-stat-content">
+            <span className="profile-stat-label">Personal Scans</span>
+            <span className="profile-stat-value">{stats.total_scans}</span>
           </div>
         </div>
 
-        <div className="daily-stat-card glass-card">
-          <div className="daily-stat-icon-wrap icon-green">
-            <ShieldCheck size={20} />
+        <div className="profile-stat-card glass-card">
+          <div className="profile-stat-icon icon-terracotta">
+            <ShieldAlert size={22} />
           </div>
-          <div>
-            <div className="daily-stat-label">Verified Safe URLs</div>
-            <div className="daily-stat-val success-text">{stats.safe_count}</div>
+          <div className="profile-stat-content">
+            <span className="profile-stat-label">Malicious Threats</span>
+            <span className="profile-stat-value danger">{stats.phishing_count}</span>
           </div>
         </div>
 
-        <div className="daily-stat-card glass-card">
-          <div className="daily-stat-icon-wrap" style={{ background: "rgba(245, 158, 11, 0.12)", color: "#f59e0b" }}>
-            <AlertTriangle size={20} />
+        <div className="profile-stat-card glass-card">
+          <div className="profile-stat-icon icon-safe">
+            <ShieldCheck size={22} />
           </div>
-          <div>
-            <div className="daily-stat-label">High Risk Detections</div>
-            <div className="daily-stat-val" style={{ color: "#f59e0b" }}>{stats.high_risk_count}</div>
+          <div className="profile-stat-content">
+            <span className="profile-stat-label">Safe URLs Verified</span>
+            <span className="profile-stat-value success">{stats.safe_count}</span>
+          </div>
+        </div>
+
+        <div className="profile-stat-card glass-card">
+          <div className="profile-stat-icon icon-warn">
+            <AlertTriangle size={22} />
+          </div>
+          <div className="profile-stat-content">
+            <span className="profile-stat-label">High-Risk Alerts</span>
+            <span className="profile-stat-value warn">{stats.high_risk_count}</span>
           </div>
         </div>
       </div>
 
       {/* Settings Forms Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
+      <div className="profile-forms-grid">
         {/* Card 1: Update Profile Name */}
-        <div className="glass-card" style={{ padding: "24px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-            <User className="cyan-text" size={20} />
-            <h4 style={{ margin: 0, fontSize: "1.1rem" }}>Personal Information</h4>
+        <div className="profile-form-card glass-card">
+          <div className="profile-form-header">
+            <User className="text-sage" size={20} />
+            <h4>Personal Information</h4>
           </div>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "20px" }}>
+          <p className="profile-form-desc">
             Update your operational analyst display name as shown on forensic reports and telemetry.
           </p>
 
           {nameNotice && (
-            <div className={`auth-alert ${nameNotice.type === "error" ? "auth-alert-error" : "auth-alert-success"}`} style={{ marginBottom: "16px" }}>
-              {nameNotice.type === "error" ? <AlertTriangle size={16} /> : <CheckCircle2 size={16} />}
+            <div className={`admin-notice-banner ${nameNotice.type === "success" ? "admin-notice-success" : "admin-notice-error"}`} style={{ marginBottom: "16px" }}>
+              {nameNotice.type === "success" ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
               <span>{nameNotice.msg}</span>
             </div>
           )}
 
           <form onSubmit={handleUpdateName}>
-            <div className="auth-field" style={{ marginBottom: "16px" }}>
-              <label className="auth-label">Analyst Display Name</label>
-              <div className="auth-input-wrapper">
-                <User className="auth-input-icon" size={18} />
+            <div className="profile-input-group">
+              <label>Analyst Display Name:</label>
+              <div className="profile-input-wrapper">
+                <User className="profile-input-icon" size={17} />
                 <input
                   type="text"
-                  className="auth-input"
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
                   placeholder="Enter full name..."
@@ -280,17 +273,17 @@ const UserProfile = () => {
               </div>
             </div>
 
-            <div className="auth-field" style={{ marginBottom: "24px" }}>
-              <label className="auth-label">Assigned SOC Email</label>
-              <div className="auth-input-wrapper" style={{ opacity: 0.7 }}>
+            <div className="profile-input-group">
+              <label>Assigned SOC Email:</label>
+              <div className="profile-input-wrapper">
+                <Mail className="profile-input-icon" size={17} />
                 <input
                   type="email"
-                  className="auth-input"
-                  value={profileData?.email || currentUser?.email || ""}
+                  value={displayEmail}
                   disabled
                 />
               </div>
-              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
+              <span className="profile-input-hint">
                 Work email address is cryptographically bound to your clearance profile.
               </span>
             </div>
@@ -299,7 +292,7 @@ const UserProfile = () => {
               type="submit"
               disabled={isUpdatingName}
               className="cyber-btn-primary"
-              style={{ width: "100%" }}
+              style={{ width: "100%", marginTop: "10px", justifyContent: "center" }}
             >
               <Save size={16} />
               <span>{isUpdatingName ? "Saving Changes..." : "Save Profile Details"}</span>
@@ -308,30 +301,29 @@ const UserProfile = () => {
         </div>
 
         {/* Card 2: Change Password */}
-        <div className="glass-card" style={{ padding: "24px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-            <Key className="cyan-text" size={20} />
-            <h4 style={{ margin: 0, fontSize: "1.1rem" }}>Security & Credentials</h4>
+        <div className="profile-form-card glass-card">
+          <div className="profile-form-header">
+            <Key className="text-sage" size={20} />
+            <h4>Security & Password</h4>
           </div>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "20px" }}>
-            Update your account password. Passwords are encrypted using PBKDF2-HMAC-SHA256 (100,000 iterations).
+          <p className="profile-form-desc">
+            Update your access password. Credentials are encrypted using PBKDF2-HMAC-SHA256 (100,000 iterations).
           </p>
 
           {passNotice && (
-            <div className={`auth-alert ${passNotice.type === "error" ? "auth-alert-error" : "auth-alert-success"}`} style={{ marginBottom: "16px" }}>
-              {passNotice.type === "error" ? <AlertTriangle size={16} /> : <CheckCircle2 size={16} />}
+            <div className={`admin-notice-banner ${passNotice.type === "success" ? "admin-notice-success" : "admin-notice-error"}`} style={{ marginBottom: "16px" }}>
+              {passNotice.type === "success" ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
               <span>{passNotice.msg}</span>
             </div>
           )}
 
           <form onSubmit={handleChangePassword}>
-            <div className="auth-field" style={{ marginBottom: "14px" }}>
-              <label className="auth-label">Current Password</label>
-              <div className="auth-input-wrapper">
-                <Lock className="auth-input-icon" size={18} />
+            <div className="profile-input-group">
+              <label>Current Password:</label>
+              <div className="profile-input-wrapper">
+                <Lock className="profile-input-icon" size={17} />
                 <input
                   type="password"
-                  className="auth-input"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="Enter current password..."
@@ -340,13 +332,12 @@ const UserProfile = () => {
               </div>
             </div>
 
-            <div className="auth-field" style={{ marginBottom: "14px" }}>
-              <label className="auth-label">New Password</label>
-              <div className="auth-input-wrapper">
-                <Key className="auth-input-icon" size={18} />
+            <div className="profile-input-group">
+              <label>New Password:</label>
+              <div className="profile-input-wrapper">
+                <Key className="profile-input-icon" size={17} />
                 <input
                   type="password"
-                  className="auth-input"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Minimum 6 characters..."
@@ -355,13 +346,12 @@ const UserProfile = () => {
               </div>
             </div>
 
-            <div className="auth-field" style={{ marginBottom: "24px" }}>
-              <label className="auth-label">Confirm New Password</label>
-              <div className="auth-input-wrapper">
-                <Key className="auth-input-icon" size={18} />
+            <div className="profile-input-group">
+              <label>Confirm New Password:</label>
+              <div className="profile-input-wrapper">
+                <Key className="profile-input-icon" size={17} />
                 <input
                   type="password"
-                  className="auth-input"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter new password..."
@@ -374,12 +364,38 @@ const UserProfile = () => {
               type="submit"
               disabled={isChangingPass}
               className="cyber-btn-secondary"
-              style={{ width: "100%", borderColor: "var(--cyan)" }}
+              style={{ width: "100%", marginTop: "10px", justifyContent: "center" }}
             >
-              <Lock size={16} className="cyan-text" />
+              <Lock size={16} className="text-sage" />
               <span>{isChangingPass ? "Encrypting & Updating..." : "Update Security Password"}</span>
             </button>
           </form>
+        </div>
+      </div>
+
+      {/* Security & Privacy Assurance Banner */}
+      <div className="profile-security-banner glass-card">
+        <div className="security-banner-content">
+          <div className="security-shield-icon-wrap">
+            <ShieldCheck size={26} />
+          </div>
+          <div className="security-banner-text">
+            <h4>Isolated Security Operations & User Data Privacy</h4>
+            <p>
+              Your personal scan history is isolated to your profile. All database operations strictly adhere to role-based access control (RBAC).
+            </p>
+          </div>
+        </div>
+
+        <div className="security-banner-actions">
+          <Link to="/history" className="about-pill-link">
+            <History size={15} />
+            <span>My Scan History</span>
+          </Link>
+          <Link to="/scanner" className="about-pill-link primary">
+            <Radar size={15} />
+            <span>Launch URL Scanner</span>
+          </Link>
         </div>
       </div>
     </div>
@@ -387,3 +403,4 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+
