@@ -946,7 +946,7 @@ const AdminPortal = () => {
         >
           <div 
             className="glass-card" 
-            style={{ width: "100%", maxWidth: "480px", padding: "28px", background: "var(--bg-surface)" }}
+            style={{ width: "100%", maxWidth: "480px", maxHeight: "90vh", overflowY: "auto", padding: "24px 20px", background: "var(--bg-surface)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -1061,7 +1061,7 @@ const AdminPortal = () => {
         >
           <div 
             className="glass-card" 
-            style={{ width: "100%", maxWidth: "440px", padding: "28px", background: "var(--bg-surface)" }}
+            style={{ width: "100%", maxWidth: "440px", maxHeight: "90vh", overflowY: "auto", padding: "24px 20px", background: "var(--bg-surface)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>

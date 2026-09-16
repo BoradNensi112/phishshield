@@ -2606,431 +2606,7 @@
   .charts-grid { grid-template-columns: 1fr; }
 }
 
-/* 2. Tablets & Mobile Breakpoint (max-width: 860px) */
-@media (max-width: 860px) {
-  /* Toggle Mobile Navbar */
-  .desktop-only { display: none !important; }
-  .desktop-status-pill { display: none !important; }
-  .mobile-menu-btn { display: flex !important; }
-
-  /* Navbar Spacing & Brand */
-  .nav-container { padding: 0 16px; }
-  .brand-subtitle { display: none !important; }
-
-  /* Layout grids drop to 1 column */
-  .result-body-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .result-gauge-col {
-    width: 100%;
-    margin: 0 auto;
-  }
-  .model-middle-grid { grid-template-columns: 1fr; }
-  .about-grid { grid-template-columns: 1fr; }
-
-  /* Scanner result header wraps */
-  .result-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-  }
-  .result-actions {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-  }
-  .result-actions button {
-    flex: 1;
-    justify-content: center;
-  }
-
-  /* Page containers have comfortable padding */
-  .home-page-container,
-  .scanner-page-container,
-  .dashboard-page-container,
-  .history-page-container,
-  .model-page-container,
-  .about-page-container {
-    padding: 24px 16px 50px;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-}
-
-/* 3. Phablets & Standard Mobile Phones (max-width: 640px) */
-@media (max-width: 640px) {
-  /* Header & Navigation */
-  .cyber-navbar { height: 64px; }
-  .main-content { padding-top: 64px; }
-  .nav-container { padding: 0 12px; }
-  .brand-title { font-size: 1.15rem; }
-  .logo-shield-wrapper { width: 36px; height: 36px; }
-  .theme-toggle-btn, .mobile-menu-btn { width: 36px; height: 36px; }
-  .nav-actions { gap: 8px; }
-
-  /* Global Cards */
-  .glass-card {
-    padding: 18px 14px;
-    border-radius: 14px;
-  }
-
-  /* Typography */
-  .hero-title { font-size: 1.85rem; line-height: 1.25; }
-  .hero-title br { display: none; }
-  .hero-description { font-size: 0.9rem; line-height: 1.6; }
-  .page-header h2 { font-size: 1.6rem; }
-  .page-header p { font-size: 0.88rem; }
-  .section-heading h2 { font-size: 1.5rem; }
-  .section-heading p { font-size: 0.88rem; }
-
-  /* Hero Section */
-  .hero-section { padding: 20px 0 36px; }
-  .hero-badge {
-    font-size: 0.72rem;
-    padding: 6px 12px;
-    letter-spacing: 0.5px;
-    max-width: 100%;
-    white-space: normal;
-    text-align: center;
-  }
-  .hero-cta-group {
-    flex-direction: column;
-    width: 100%;
-    gap: 10px;
-  }
-  .hero-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px 18px;
-    font-size: 0.92rem;
-  }
-  .hero-radar-display {
-    width: 210px;
-    height: 210px;
-    margin: 20px auto 0;
-  }
-
-  /* Stats Banner */
-  .stats-banner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    text-align: center;
-    padding: 18px 14px;
-  }
-  .stat-box { min-width: 0; }
-  .stat-divider { display: none; }
-  .stat-number { font-size: 1.65rem; }
-  .stat-label { font-size: 0.75rem; }
-
-  /* Features Grid (Home) */
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .feature-card { padding: 18px 16px; }
-
-  /* Scanner Inputs */
-  .scanner-input-wrapper { padding: 16px 14px; }
-  .scanner-input {
-    font-size: 0.88rem;
-    padding: 12px 14px;
-  }
-  .scanner-button-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .scan-btn, .clear-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px;
-  }
-  .sample-presets {
-    padding: 0 14px 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .preset-chips {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .preset-chip {
-    font-size: 0.75rem;
-    padding: 5px 10px;
-  }
-  .scanner-error-box {
-    margin: 0 14px 16px;
-    font-size: 0.82rem;
-  }
-
-  /* Result Card & Gauge */
-  .verdict-text { font-size: 1.5rem; }
-  .result-actions {
-    flex-direction: column;
-    width: 100%;
-    gap: 8px;
-  }
-  .result-actions button {
-    width: 100%;
-    justify-content: center;
-  }
-  .scanned-url-display { padding: 10px 12px; }
-  .scanned-url-display .url-text { font-size: 0.82rem; }
-  .dns-status-strip {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 10px 12px;
-  }
-
-  /* Feature Table Controls */
-  .feature-drawer-card { padding: 18px 14px; }
-  .feature-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  .feature-filter-row {
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-  .filter-search-box {
-    width: 100%;
-  }
-  .filter-search-box input {
-    width: 100%;
-  }
-  .cat-pill-group {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .cat-pill {
-    font-size: 0.75rem;
-    padding: 4px 10px;
-  }
-
-  /* Dashboard KPIs & Flex Header */
-  .flex-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .flex-header button {
-    align-self: flex-start;
-  }
-  .kpi-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .kpi-card {
-    padding: 14px 12px;
-    gap: 12px;
-  }
-  .kpi-icon-wrapper {
-    width: 42px;
-    height: 42px;
-  }
-  .kpi-value { font-size: 1.5rem; }
-  .kpi-label { font-size: 0.75rem; }
-  .chart-card { padding: 16px 12px; }
-  .chart-header h4 { font-size: 1.05rem; }
-
-  /* Recent Activity Feed Mobile Rules */
-  .desktop-only-table {
-    display: none !important;
-  }
-  .recent-mobile-list {
-    display: flex !important;
-  }
-  .recent-scans-card {
-    padding: 16px 12px;
-  }
-  .recent-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
-  .recent-header h4 {
-    font-size: 1.02rem;
-  }
-  .recent-header .cyber-btn-secondary {
-    padding: 6px 12px;
-    font-size: 0.78rem;
-  }
-
-  /* History Filters & Table */
-  .history-filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 14px;
-  }
-  .history-search-input-box {
-    width: 100%;
-    min-width: unset;
-  }
-  .history-actions-row {
-    width: 100%;
-    display: flex;
-    gap: 8px;
-  }
-  .history-actions-row button {
-    flex: 1;
-    justify-content: center;
-  }
-  .filter-pill-row {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .truncate-url-col {
-    max-width: 220px;
-  }
-
-  /* Model Performance Page */
-  .metrics-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .metric-card { padding: 14px 12px; }
-  .metric-value { font-size: 1.6rem; }
-  .cm-breakdown-table {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .spec-item {
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-
-  /* About Page */
-  .dataset-stats-row {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .tech-stack-pills {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .entropy-math-box {
-    padding: 12px 14px;
-  }
-  .formula {
-    font-size: 0.95rem;
-    word-break: break-all;
-  }
-
-  /* Footer */
-  .footer-top {
-    flex-direction: column;
-    gap: 20px;
-  }
-  .footer-bottom {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-    align-items: center;
-  }
-  .footer-badges {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
-
-/* 4. Small Mobile Screens (max-width: 420px) */
-@media (max-width: 420px) {
-  .nav-container { padding: 0 10px; }
-  .brand-title { font-size: 1.05rem; }
-  .brand-subtitle { display: none !important; }
-  .logo-shield-wrapper {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-  }
-  .theme-toggle-btn, .mobile-menu-btn {
-    width: 34px;
-    height: 34px;
-  }
-  .nav-actions { gap: 6px; }
-
-  /* Compact Hero */
-  .hero-title { font-size: 1.6rem; }
-  .hero-badge {
-    font-size: 0.65rem;
-    padding: 4px 8px;
-  }
-  .hero-radar-display {
-    width: 180px;
-    height: 180px;
-  }
-  .radar-shield-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  /* Stats Banner, KPIs & Metrics full single column */
-  .stats-banner {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .kpi-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .metrics-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .dataset-stats-row {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  /* Cards & Spacing */
-  .glass-card {
-    padding: 14px 10px;
-    border-radius: 12px;
-  }
-  .home-page-container,
-  .scanner-page-container,
-  .dashboard-page-container,
-  .history-page-container,
-  .model-page-container,
-  .about-page-container {
-    padding: 16px 10px 40px;
-  }
-
-  /* Preset chips wrap tightly */
-  .preset-chips { gap: 4px; }
-  .preset-chip {
-    font-size: 0.7rem;
-    padding: 4px 8px;
-  }
-
-  .verdict-text { font-size: 1.3rem; }
-}
-
-/* 5. Ultra-Compact Devices (max-width: 360px, e.g. Galaxy Fold outer / iPhone SE / 320px) */
-@media (max-width: 360px) {
-  .nav-container { padding: 0 8px; }
-  .brand-title { font-size: 0.95rem; }
-  .hero-title { font-size: 1.45rem; }
-  .hero-radar-display { width: 150px; height: 150px; }
-  .glass-card { padding: 12px 8px; }
-  .stat-number { font-size: 1.45rem; }
-  .kpi-value { font-size: 1.35rem; }
-  .metric-value { font-size: 1.45rem; }
-  .scan-btn, .clear-btn { font-size: 0.88rem; }
-}
+/* (Responsive media queries consolidated at bottom of file) */
 
 /* ===================================================================
    AUTHENTICATION & USER PROFILE STYLES
@@ -6335,6 +5911,670 @@ select:-webkit-autofill,
 }
 
 
+/* ===================================================================
+   CONSOLIDATED COMPREHENSIVE RESPONSIVE SYSTEM (ALL VIEWPORTS)
+   =================================================================== */
 
+/* 1. Large Tablets & Small Laptops (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .hero-title { font-size: 2.5rem; }
+  .charts-grid { grid-template-columns: 1fr; }
+  .model-middle-grid { grid-template-columns: 1fr; }
+}
 
+/* 2. Tablets & Mobile Breakpoint (max-width: 860px) */
+@media (max-width: 860px) {
+  /* Toggle Mobile Navbar */
+  .desktop-only { display: none !important; }
+  .desktop-status-pill { display: none !important; }
+  .header-nav-tier { display: none !important; }
+  .tactile-user-pill { display: none !important; }
+  .mobile-menu-btn { display: flex !important; }
 
+  /* Navbar Spacing & Brand */
+  .top-tier-container { padding: 0 16px; }
+  .nav-container { padding: 0 16px; }
+  .brand-subtitle { display: none !important; }
+  .tactile-brand-subtitle { display: none !important; }
+
+  /* Layout grids drop to 1 column */
+  .result-body-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .result-gauge-col {
+    width: 100%;
+    margin: 0 auto;
+  }
+  .model-middle-grid { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+
+  /* Scanner result header wraps */
+  .result-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .result-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+  .result-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* Page containers padding */
+  .home-page-container,
+  .scanner-page-container,
+  .dashboard-page-container,
+  .history-page-container,
+  .model-page-container,
+  .about-page-container,
+  .profile-page-container,
+  .admin-portal-container,
+  .auth-page-container {
+    padding: 24px 16px 50px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+/* 3. Phablets & Standard Mobile Phones (max-width: 640px) */
+@media (max-width: 640px) {
+  /* Header & Navigation */
+  .cyber-navbar { height: 60px; }
+  .main-content { padding-top: 0; }
+  .top-tier-container { padding: 0 12px; }
+  .nav-container { padding: 0 12px; }
+  .brand-title { font-size: 1.12rem; }
+  .tactile-logo-badge { width: 36px; height: 36px; border-radius: 11px; }
+  .tactile-shield-icon { width: 20px; height: 20px; }
+  .logo-shield-wrapper { width: 34px; height: 34px; }
+  .theme-toggle-btn, .mobile-menu-btn, .tactile-theme-btn { width: 36px; height: 36px; }
+  .nav-actions { gap: 6px; }
+  .top-tier-actions { gap: 8px; }
+
+  /* Global Cards */
+  .glass-card {
+    padding: 18px 14px;
+    border-radius: 14px;
+  }
+
+  /* Typography */
+  .hero-title { font-size: 1.85rem; line-height: 1.25; }
+  .hero-title br { display: none; }
+  .hero-description { font-size: 0.9rem; line-height: 1.6; }
+  .page-header h2 { font-size: 1.48rem; }
+  .page-header p { font-size: 0.86rem; }
+  .section-heading h2 { font-size: 1.38rem; }
+  .section-heading p { font-size: 0.86rem; }
+
+  /* Hero Section */
+  .hero-section { padding: 20px 0 36px; }
+  .hero-badge {
+    font-size: 0.72rem;
+    padding: 6px 12px;
+    letter-spacing: 0.5px;
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .hero-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+    font-size: 0.92rem;
+  }
+  .hero-radar-display {
+    width: 210px;
+    height: 210px;
+    margin: 20px auto 0;
+  }
+
+  /* Stats Banner */
+  .stats-banner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    text-align: center;
+    padding: 16px 12px;
+  }
+  .stat-box { min-width: 0; }
+  .stat-divider { display: none; }
+  .stat-number { font-size: 1.6rem; }
+  .stat-label { font-size: 0.75rem; }
+
+  /* Features Grid (Home) */
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .feature-card { padding: 18px 16px; }
+
+  /* Scanner Inputs & Omnibar */
+  .scanner-omnibar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    gap: 10px;
+    border-radius: 14px;
+  }
+  .scanner-omnibar-input {
+    width: 100%;
+    font-size: 0.92rem;
+    padding: 6px 0;
+  }
+  .omnibar-actions {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+  }
+  .omnibar-action-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 12px;
+  }
+  .scan-btn-primary {
+    flex: 2;
+    justify-content: center;
+    padding: 9px 14px;
+    font-size: 0.9rem;
+  }
+  .scanner-input-wrapper { padding: 16px 14px; }
+  .scanner-input {
+    font-size: 0.88rem;
+    padding: 12px 14px;
+  }
+  .scanner-button-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .scan-btn, .clear-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  /* Presets & Capabilities */
+  .scanner-presets-container {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+  .presets-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .presets-group-label {
+    min-width: unset;
+    font-size: 0.76rem;
+  }
+  .preset-chips-row {
+    width: 100%;
+    gap: 6px;
+  }
+  .preset-pill {
+    font-size: 0.76rem;
+    padding: 5px 10px;
+  }
+  .scanner-capabilities-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .scanner-error-banner {
+    margin: 0 10px 14px;
+    font-size: 0.82rem;
+  }
+
+  /* Result Card & Gauge */
+  .verdict-text { font-size: 1.45rem; }
+  .result-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+  .result-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  .scanned-url-display { padding: 10px 12px; }
+  .scanned-url-display .url-text { font-size: 0.82rem; }
+  .dns-status-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  /* Feature Table Controls */
+  .feature-drawer-card { padding: 18px 14px; }
+  .feature-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .feature-filter-row {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  .filter-search-box { width: 100%; }
+  .filter-search-box input { width: 100%; }
+  .cat-pill-group {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .cat-pill {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  /* Dashboard KPIs & Flex Header */
+  .flex-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .flex-header button {
+    align-self: flex-start;
+  }
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .kpi-card {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+  .kpi-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  .kpi-value { font-size: 1.45rem; }
+  .kpi-label { font-size: 0.72rem; }
+  .chart-card { padding: 16px 12px; }
+  .chart-header h4 { font-size: 1.02rem; }
+
+  /* Recent Activity Feed Mobile Rules */
+  .desktop-only-table {
+    display: none !important;
+  }
+  .recent-mobile-list {
+    display: flex !important;
+  }
+  .recent-scans-card {
+    padding: 16px 12px;
+  }
+  .recent-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .recent-header h4 {
+    font-size: 1.02rem;
+  }
+
+  /* Scan History Page */
+  .daily-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .daily-stat-card {
+    padding: 14px 12px;
+    gap: 10px;
+  }
+  .daily-stat-icon-wrap {
+    width: 40px;
+    height: 40px;
+  }
+  .daily-stat-val {
+    font-size: 1.45rem;
+  }
+  .date-filter-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+  .date-preset-group {
+    width: 100%;
+    gap: 6px;
+  }
+  .date-tab-btn {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+  .custom-date-picker-wrap {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .cyber-date-input {
+    flex: 1;
+    width: 100%;
+  }
+  .history-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+  .history-search-input-box {
+    width: 100%;
+    min-width: unset;
+  }
+  .history-actions-row {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .history-actions-row button {
+    flex: 1 1 45%;
+    justify-content: center;
+  }
+  .bulk-actions-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+  .bulk-btn-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+  .bulk-btn-group button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Admin Portal Responsiveness */
+  .admin-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-tabs::-webkit-scrollbar { display: none; }
+  .admin-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .admin-user-pills-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-user-pills-bar::-webkit-scrollbar { display: none; }
+
+  /* User Profile Responsiveness */
+  .profile-identity-card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+  .profile-identity-layout {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .profile-avatar-box {
+    width: 58px;
+    height: 58px;
+    font-size: 1.5rem;
+    border-radius: 16px;
+  }
+  .profile-display-title {
+    font-size: 1.35rem;
+  }
+  .profile-info-block {
+    min-width: 0;
+    width: 100%;
+  }
+  .profile-meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .profile-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .profile-stat-card {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+  .profile-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+  .profile-stat-value {
+    font-size: 1.45rem;
+  }
+  .profile-forms-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .profile-form-card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+  .profile-security-banner {
+    padding: 18px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .security-banner-content {
+    min-width: 0;
+    width: 100%;
+  }
+  .security-banner-actions {
+    width: 100%;
+  }
+  .security-banner-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* About Guide Responsiveness */
+  .tactile-features-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .tactile-feature-card {
+    padding: 20px 16px;
+  }
+  .about-hero-card {
+    padding: 22px 16px;
+  }
+  .about-hero-pills {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+  .about-pill-link {
+    width: 100%;
+    justify-content: center;
+  }
+  .support-form-card {
+    padding: 20px 16px;
+  }
+  .support-submit-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .support-submit-row button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Model Performance Page */
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .metric-card { padding: 14px 12px; }
+  .metric-value { font-size: 1.5rem; }
+  .cm-breakdown-table {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .cm-image-wrapper {
+    padding: 6px;
+  }
+  .cm-image {
+    width: 100%;
+    height: auto;
+  }
+  .spec-item {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  /* Footer */
+  .footer-top {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    align-items: center;
+  }
+  .footer-badges {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* 4. Small Mobile Screens (max-width: 480px) */
+@media (max-width: 480px) {
+  .top-tier-container { padding: 0 10px; }
+  .nav-container { padding: 0 10px; }
+  .brand-title { font-size: 1.05rem; }
+  .brand-subtitle { display: none !important; }
+  .tactile-brand-subtitle { display: none !important; }
+  .tactile-logo-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+  }
+  .logo-shield-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+  .theme-toggle-btn, .mobile-menu-btn, .tactile-theme-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .top-tier-actions { gap: 6px; }
+  .nav-actions { gap: 6px; }
+
+  /* Compact Hero */
+  .hero-title { font-size: 1.6rem; }
+  .hero-badge {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+  }
+  .hero-radar-display {
+    width: 180px;
+    height: 180px;
+  }
+  .radar-shield-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Stats Banner, KPIs & Metrics full single column */
+  .stats-banner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .daily-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .profile-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .dataset-stats-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Cards & Spacing */
+  .glass-card {
+    padding: 14px 10px;
+    border-radius: 12px;
+  }
+  .home-page-container,
+  .scanner-page-container,
+  .dashboard-page-container,
+  .history-page-container,
+  .model-page-container,
+  .about-page-container,
+  .profile-page-container,
+  .admin-portal-container,
+  .auth-page-container {
+    padding: 16px 10px 40px;
+  }
+
+  /* Preset chips wrap tightly */
+  .preset-chips { gap: 4px; }
+  .preset-chip {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+
+  .verdict-text { font-size: 1.3rem; }
+  .history-actions-row button {
+    flex: 1 1 100%;
+  }
+}
+
+/* 5. Ultra-Compact Devices (max-width: 360px, e.g. Galaxy Fold outer / iPhone SE / 320px) */
+@media (max-width: 360px) {
+  .top-tier-container { padding: 0 8px; }
+  .nav-container { padding: 0 8px; }
+  .brand-title { font-size: 0.92rem; }
+  .tactile-logo-badge { width: 30px; height: 30px; border-radius: 8px; }
+  .hero-title { font-size: 1.42rem; }
+  .hero-radar-display { width: 145px; height: 145px; }
+  .glass-card { padding: 12px 8px; }
+  .stat-number { font-size: 1.4rem; }
+  .kpi-value { font-size: 1.3rem; }
+  .metric-value { font-size: 1.4rem; }
+  .scan-btn, .clear-btn, .scan-btn-primary { font-size: 0.85rem; }
+}
