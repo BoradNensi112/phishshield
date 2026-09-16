@@ -598,7 +598,7 @@
 }
 
 .scanner-card:hover {
-  border-color: rgba(94, 168, 126, 0.35);
+  border-color: rgba(123, 189, 232, 0.35);
   box-shadow: 0 16px 38px -8px rgba(0, 0, 0, 0.12);
 }
 
@@ -728,7 +728,7 @@
   background: var(--cyan);
   color: #ffffff;
   border: none;
-  box-shadow: 0 4px 14px rgba(59, 116, 84, 0.3);
+  box-shadow: 0 4px 14px rgba(10, 65, 116, 0.35);
   transition: all 0.2s ease;
   white-space: nowrap;
 }
@@ -736,7 +736,7 @@
 .scan-btn-primary:hover:not(:disabled) {
   background: var(--cyan-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(59, 116, 84, 0.4);
+  box-shadow: 0 6px 18px rgba(10, 65, 116, 0.45);
 }
 
 .scan-btn-primary:disabled {
@@ -1158,8 +1158,8 @@
   transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.bg-sage { background: linear-gradient(90deg, #3b7454, #4ade80); }
-.bg-terracotta { background: linear-gradient(90deg, #f59e0b, #e07a5f); }
+.bg-sage { background: linear-gradient(90deg, #0A4174, #7BBDE8); }
+.bg-terracotta { background: linear-gradient(90deg, #f59e0b, #f43f5e); }
 
 .confidence-explainer {
   font-size: 0.77rem;
@@ -4788,7 +4788,7 @@ select:-webkit-autofill,
 
 .header-top-tier {
   padding: 10px 0;
-  border-bottom: 1px solid rgba(70, 107, 85, 0.1);
+  border-bottom: 1px solid rgba(73, 118, 159, 0.15);
 }
 
 .top-tier-container {
@@ -4813,12 +4813,12 @@ select:-webkit-autofill,
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--cyan-subtle), rgba(59, 116, 84, 0.2));
+  background: linear-gradient(135deg, var(--cyan-subtle), rgba(123, 189, 232, 0.2));
   border: 1.5px solid var(--cyan);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(59, 116, 84, 0.18);
+  box-shadow: 0 4px 14px rgba(123, 189, 232, 0.18);
   transition: transform 0.2s ease;
 }
 
@@ -4959,7 +4959,7 @@ select:-webkit-autofill,
   background: var(--cyan);
   color: #ffffff;
   border: 1px solid var(--cyan);
-  box-shadow: 0 4px 12px rgba(59, 116, 84, 0.2);
+  box-shadow: 0 4px 12px rgba(123, 189, 232, 0.2);
 }
 
 .tactile-auth-btn.register-btn:hover {
@@ -5011,14 +5011,14 @@ select:-webkit-autofill,
 .tactile-nav-item:hover {
   color: var(--cyan);
   background: var(--cyan-subtle);
-  border-color: rgba(59, 116, 84, 0.15);
+  border-color: rgba(123, 189, 232, 0.15);
 }
 
 .tactile-nav-item.active {
   color: #ffffff;
   background: var(--cyan);
   border-color: var(--cyan);
-  box-shadow: 0 4px 14px rgba(59, 116, 84, 0.25);
+  box-shadow: 0 4px 14px rgba(123, 189, 232, 0.25);
 }
 
 /* Mobile Drawer Responsive Styles */
@@ -5163,7 +5163,7 @@ select:-webkit-autofill,
 .auth-role-tab.active {
   background: var(--cyan);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(59, 116, 84, 0.25);
+  box-shadow: 0 4px 12px rgba(123, 189, 232, 0.25);
 }
 
 .auth-role-tag-badge {
@@ -5252,7 +5252,7 @@ select:-webkit-autofill,
   background: var(--cyan);
   border-color: var(--cyan);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(59, 116, 84, 0.25);
+  box-shadow: 0 4px 12px rgba(123, 189, 232, 0.25);
 }
 
 .user-pill-counter {
@@ -5314,9 +5314,9 @@ select:-webkit-autofill,
 }
 
 .action-btn-view-activity {
-  background: rgba(59, 116, 84, 0.12) !important;
+  background: rgba(123, 189, 232, 0.12) !important;
   color: var(--cyan) !important;
-  border: 1px solid rgba(59, 116, 84, 0.3) !important;
+  border: 1px solid rgba(10, 65, 116, 0.35) !important;
 }
 
 .action-btn-view-activity:hover {
@@ -5414,7 +5414,7 @@ select:-webkit-autofill,
   background: var(--cyan);
   color: #ffffff;
   border-color: var(--cyan);
-  box-shadow: 0 4px 14px rgba(59, 116, 84, 0.25);
+  box-shadow: 0 4px 14px rgba(123, 189, 232, 0.25);
 }
 
 .about-pill-link.primary:hover {
@@ -5492,9 +5492,9 @@ select:-webkit-autofill,
 }
 
 .feature-icon-circle.icon-green {
-  background: rgba(59, 116, 84, 0.14);
+  background: rgba(123, 189, 232, 0.14);
   color: var(--cyan);
-  border: 1px solid rgba(59, 116, 84, 0.3);
+  border: 1px solid rgba(10, 65, 116, 0.35);
 }
 
 .feature-icon-circle.icon-stone {
@@ -5562,7 +5562,7 @@ select:-webkit-autofill,
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
-  box-shadow: 0 4px 14px rgba(59, 116, 84, 0.25);
+  box-shadow: 0 4px 14px rgba(123, 189, 232, 0.25);
 }
 
 .how-to-step-card h4 {
@@ -5766,7 +5766,7 @@ select:-webkit-autofill,
   width: 76px;
   height: 76px;
   border-radius: 22px;
-  background: linear-gradient(135deg, var(--cyan-subtle), rgba(59, 116, 84, 0.25));
+  background: linear-gradient(135deg, var(--cyan-subtle), rgba(123, 189, 232, 0.25));
   border: 2px solid var(--cyan);
   color: var(--cyan);
   font-size: 2.1rem;
@@ -5774,7 +5774,7 @@ select:-webkit-autofill,
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 18px rgba(59, 116, 84, 0.2);
+  box-shadow: 0 6px 18px rgba(123, 189, 232, 0.2);
   flex-shrink: 0;
 }
 
