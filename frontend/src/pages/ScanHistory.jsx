@@ -386,13 +386,18 @@ const ScanHistory = () => {
       {/* Header Banner */}
       <div className="page-header flex-header">
         <div>
-          <div className="header-badge">FORENSIC AUDIT TRAIL</div>
-          <h2>URL Threat Scan History</h2>
-          <p style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          <div className="header-badge">
+            <span className="pulse-dot"></span>
+            <span>FORENSIC AUDIT TRAIL // ACTIVITY LOGS</span>
+          </div>
+          <h2 style={{ margin: "4px 0 8px", fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)" }}>
+            URL Threat Scan History
+          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
             <span className="user-view-tag">
               <User size={14} /> Personal Scan Log: <strong>{currentUser?.email || "Analyst"}</strong>
             </span>
-          </p>
+          </div>
         </div>
 
         <div className="history-actions-row">
@@ -438,43 +443,49 @@ const ScanHistory = () => {
       <div className="daily-stats-grid">
         <div className="daily-stat-card glass-card">
           <div className="daily-stat-icon-wrap icon-blue">
-            <History size={20} />
+            <History size={22} />
           </div>
           <div>
             <div className="daily-stat-label">
               {dateFilter === "today" ? "Today's Scans" : dateFilter === "yesterday" ? "Yesterday's Scans" : dateFilter === "custom" ? `Scans on ${customDate}` : "Selected Period Scans"}
             </div>
             <div className="daily-stat-val">{dailyTotal}</div>
+            <div className="daily-stat-subtext">Total Audited Scans</div>
           </div>
         </div>
 
         <div className="daily-stat-card glass-card">
           <div className="daily-stat-icon-wrap icon-red">
-            <ShieldAlert size={20} />
+            <ShieldAlert size={22} />
           </div>
           <div>
             <div className="daily-stat-label">Malicious Threats</div>
             <div className="daily-stat-val danger-text">{dailyPhish}</div>
+            <div className="daily-stat-subtext">Critical Risk Flags</div>
           </div>
         </div>
 
         <div className="daily-stat-card glass-card">
           <div className="daily-stat-icon-wrap icon-green">
-            <ShieldCheck size={20} />
+            <ShieldCheck size={22} />
           </div>
           <div>
             <div className="daily-stat-label">Clean / Legitimate</div>
             <div className="daily-stat-val success-text">{dailyClean}</div>
+            <div className="daily-stat-subtext">Verified Benign Targets</div>
           </div>
         </div>
 
         <div className="daily-stat-card glass-card">
-          <div className="daily-stat-icon-wrap icon-purple">
-            <BarChart2 size={20} />
+          <div className="daily-stat-icon-wrap icon-teal">
+            <BarChart2 size={22} />
           </div>
           <div>
             <div className="daily-stat-label">Threat Percentage</div>
-            <div className="daily-stat-val mono">{phishRate}%</div>
+            <div className={`daily-stat-val mono ${phishRate > 0 ? "danger-text" : "success-text"}`}>
+              {phishRate}%
+            </div>
+            <div className="daily-stat-subtext">Calculated Risk Ratio</div>
           </div>
         </div>
       </div>
