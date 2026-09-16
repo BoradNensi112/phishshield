@@ -50,121 +50,128 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { path: "/", label: "Home", icon: <Shield size={18} />, isProtected: false },
-    { path: "/scanner", label: "URL Scanner", icon: <Radar size={18} />, isProtected: true },
-    { path: "/dashboard", label: "Dashboard", icon: <BarChart3 size={18} />, isProtected: true },
-    { path: "/history", label: "Scan History", icon: <History size={18} />, isProtected: true },
-    { path: "/model", label: "Model Metrics", icon: <Activity size={18} />, isProtected: true },
-    ...(isAdmin ? [{ path: "/admin", label: "Admin Console", icon: <ShieldAlert size={18} />, isProtected: true }] : []),
-    ...(isAuthenticated ? [{ path: "/profile", label: "My Profile", icon: <User size={18} />, isProtected: true }] : []),
-    { path: "/about", label: "About", icon: <Info size={18} />, isProtected: false },
+    { path: "/scanner", label: "URL Scanner", icon: <Radar size={17} />, isProtected: true },
+    { path: "/dashboard", label: "Dashboard", icon: <BarChart3 size={17} />, isProtected: true },
+    { path: "/history", label: "Scan History", icon: <History size={17} />, isProtected: true },
+    { path: "/model", label: "Model Metrics", icon: <Activity size={17} />, isProtected: true },
+    ...(isAdmin ? [{ path: "/admin", label: "Admin Console", icon: <ShieldAlert size={17} />, isProtected: true }] : []),
+    { path: "/profile", label: "My Profile", icon: <User size={17} />, isProtected: true },
+    { path: "/about", label: "About Guide", icon: <Info size={17} />, isProtected: false },
   ];
 
   return (
     <>
-      <nav className="cyber-navbar">
-        <div className="nav-container">
-          <Link to="/" className="nav-brand" onClick={() => setMobileMenuOpen(false)}>
-            <div className="logo-shield-wrapper">
-              <Shield className="logo-shield-icon" size={28} />
+      <header className="tactile-header-wrapper">
+        {/* Tier 1: Brand & User Profile / Status Controls */}
+        <div className="header-top-tier">
+          <div className="top-tier-container">
+            {/* Left: Brand Identity */}
+            <Link to={isAuthenticated ? "/scanner" : "/login"} className="tactile-brand-block" onClick={() => setMobileMenuOpen(false)}>
+              <div className="tactile-logo-badge">
+                <Shield className="tactile-shield-icon" size={24} />
+              </div>
+              <div className="brand-text-block">
+                <span className="brand-title">Phish<span className="brand-accent">Shield</span></span>
+                <span className="brand-subtitle">CYBER DEFENSE PLATFORM</span>
+              </div>
+            </Link>
+
+            {/* Right: Status & User Controls */}
+            <div className="top-tier-actions">
+              {/* API Health indicator */}
+              <div className={`api-status-pill desktop-only ${apiOnline ? "online" : "offline"}`} title={apiOnline ? "FastAPI Backend Online" : "Connecting..."}>
+                <span className="pulse-dot"></span>
+                <span className="status-label">{apiOnline ? "API Online" : "Connecting"}</span>
+              </div>
+
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                className="tactile-theme-btn"
+                title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+                aria-label="Toggle Theme"
+              >
+                {theme === "dark" ? <Sun size={18} className="sun-icon" /> : <Moon size={18} className="moon-icon" />}
+              </button>
+
+              {/* Desktop Auth Controls */}
+              <div className="desktop-only">
+                {isAuthenticated ? (
+                  <div className="tactile-user-pill">
+                    <Link to="/profile" className="tactile-profile-link" title="Open Analyst Profile">
+                      <div className="user-avatar-circle">
+                        <User size={15} />
+                      </div>
+                      <div className="user-info-text">
+                        <span className="user-display-name">{currentUser?.name || "Analyst"}</span>
+                        <span className="user-role-tag">{currentUser?.role || (isAdmin ? "SOC Administrator" : "SOC Analyst")}</span>
+                      </div>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="tactile-logout-btn"
+                      title="Log Out Terminal"
+                      aria-label="Log Out"
+                    >
+                      <LogOut size={15} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="nav-guest-actions">
+                    <Link
+                      to="/login"
+                      className={`tactile-auth-btn login-btn ${location.pathname === "/login" ? "active" : ""}`}
+                    >
+                      <LogIn size={15} />
+                      <span>Sign In</span>
+                    </Link>
+                    <Link
+                      to="/register"
+                      className={`tactile-auth-btn register-btn ${location.pathname === "/register" ? "active" : ""}`}
+                    >
+                      <UserPlus size={15} />
+                      <span>Register</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Hamburger Toggle Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="mobile-menu-btn"
+                title={mobileMenuOpen ? "Close Menu" : "Open Menu"}
+                aria-label="Toggle Navigation Menu"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
             </div>
-            <div className="brand-text-block">
-              <span className="brand-title">Phish<span className="brand-accent">Shield</span></span>
-              <span className="brand-subtitle">CYBER DEFENSE PLATFORM</span>
-            </div>
-          </Link>
-
-          {/* Desktop Nav Links */}
-          <div className="nav-links desktop-only">
-            {navLinks.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`nav-link-item ${isActive ? "active" : ""}`}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                  {item.isProtected && !isAuthenticated && (
-                    <Lock size={12} className="nav-lock-badge-icon" title="Login Required" />
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-
-          <div className="nav-actions">
-            {/* Desktop Auth Controls */}
-            <div className="nav-auth-controls desktop-only">
-              {isAuthenticated ? (
-                <div className="nav-user-profile-badge">
-                  <Link to="/profile" className="nav-profile-link-wrapper" title="Open Analyst Profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
-                    <div className="user-avatar-circle">
-                      <User size={15} />
-                    </div>
-                    <div className="user-info-text">
-                      <span className="user-display-name">{currentUser?.name || "Analyst"}</span>
-                      <span className="user-role-tag">{currentUser?.role || "SOC Analyst"}</span>
-                    </div>
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="nav-logout-btn"
-                    title="Log Out Terminal"
-                    aria-label="Log Out"
-                  >
-                    <LogOut size={15} />
-                  </button>
-                </div>
-              ) : (
-                <div className="nav-guest-actions">
-                  <Link
-                    to="/login"
-                    className={`nav-auth-btn login-btn ${location.pathname === "/login" ? "active" : ""}`}
-                  >
-                    <LogIn size={15} />
-                    <span>Sign In</span>
-                  </Link>
-                  <Link
-                    to="/register"
-                    className={`nav-auth-btn register-btn ${location.pathname === "/register" ? "active" : ""}`}
-                  >
-                    <UserPlus size={15} />
-                    <span>Register</span>
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* API Health indicator (desktop only) */}
-            <div className={`api-status-pill desktop-status-pill ${apiOnline ? "online" : "offline"}`} title={apiOnline ? "FastAPI Backend Connected" : "Connecting to Backend..."}>
-              <span className="pulse-dot"></span>
-              <span className="status-label">{apiOnline ? "API Online" : "Connecting"}</span>
-            </div>
-
-            {/* Theme Toggle Button */}
-            <button
-              onClick={toggleTheme}
-              className="theme-toggle-btn"
-              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
-              aria-label="Toggle Theme"
-            >
-              {theme === "dark" ? <Sun size={20} className="sun-icon" /> : <Moon size={20} className="moon-icon" />}
-            </button>
-
-            {/* Mobile Hamburger Toggle Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="mobile-menu-btn"
-              title={mobileMenuOpen ? "Close Menu" : "Open Menu"}
-              aria-label="Toggle Navigation Menu"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
           </div>
         </div>
-      </nav>
+
+        {/* Tier 2: Dedicated Spacious Navigation Command Bar */}
+        {isAuthenticated && (
+          <nav className="header-nav-tier desktop-only">
+            <div className="nav-tier-container">
+              <div className="tactile-nav-strip">
+                {navLinks.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`tactile-nav-item ${isActive ? "active" : ""}`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </nav>
+        )}
+      </header>
 
       {/* Mobile Navigation Drawer & Backdrop */}
       {mobileMenuOpen && (

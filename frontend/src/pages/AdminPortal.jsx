@@ -3,7 +3,7 @@ import {
   Users, Shield, ShieldCheck, ShieldAlert, Activity, Search, 
   Trash2, UserX, UserCheck, RefreshCw, Download, Filter, 
   CheckCircle2, AlertTriangle, Database, Lock, Clock, Calendar, Globe,
-  UserPlus, Key, X, Check
+  UserPlus, Key, X, Check, Eye, Mail, User, MessageSquare
 } from "lucide-react";
 import apiService from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -18,7 +18,7 @@ const ROLES = [
 
 const AdminPortal = () => {
   const { currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState("users"); // 'users' | 'scans' | 'system'
+  const [activeTab, setActiveTab] = useState("users"); // 'users' | 'scans' | 'support' | 'system'
   
   // User Management State
   const [users, setUsers] = useState([]);
@@ -45,6 +45,10 @@ const AdminPortal = () => {
   const [scanSearch, setScanSearch] = useState("");
   const [analystFilter, setAnalystFilter] = useState("all");
   const [verdictFilter, setVerdictFilter] = useState("all");
+
+  // Support Inquiries State
+  const [supportMessages, setSupportMessages] = useState([]);
+  const [supportLoading, setSupportLoading] = useState(false);
 
   const showNotice = (msg, type = "success") => {
     setActionNotice({ msg, type });
@@ -96,9 +100,23 @@ const AdminPortal = () => {
     }
   };
 
+  // Fetch Support Inquiries
+  const loadSupportMessages = async () => {
+    setSupportLoading(true);
+    try {
+      const data = await apiService.getAdminSupportMessages();
+      setSupportMessages(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load support messages:", err);
+    } finally {
+      setSupportLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
     loadScans();
+    loadSupportMessages();
   }, []);
 
   // Create User
@@ -384,6 +402,13 @@ const AdminPortal = () => {
         </button>
 
         <button
+          className={`admin-tab-nav-btn ${activeTab === "support" ? "active" : ""}`}
+          onClick={() => setActiveTab("support")}
+        >
+          <Mail size={16} /> User Inquiries & Support ({supportMessages.length})
+        </button>
+
+        <button
           className={`admin-tab-nav-btn ${activeTab === "system" ? "active" : ""}`}
           onClick={() => setActiveTab("system")}
         >
@@ -518,6 +543,19 @@ const AdminPortal = () => {
 
                         <td style={{ textAlign: "right" }}>
                           <div className="admin-actions-cell">
+                            {/* View Scans Button */}
+                            <button
+                              className="action-btn action-btn-view-activity"
+                              onClick={() => {
+                                setAnalystFilter(u.email);
+                                setActiveTab("scans");
+                              }}
+                              title={`Inspect all scans performed by ${u.name}`}
+                            >
+                              <Eye size={13} />
+                              <span>Scans</span>
+                            </button>
+
                             {/* Reset Password Button */}
                             <button
                               className="action-btn action-btn-pwd"
@@ -606,20 +644,6 @@ const AdminPortal = () => {
                 />
               </div>
 
-              {/* Analyst Filter Dropdown */}
-              <select
-                className="admin-role-select"
-                value={analystFilter}
-                onChange={(e) => setAnalystFilter(e.target.value)}
-              >
-                <option value="all">All Analysts</option>
-                {Array.from(new Set(scans.map(s => s.user_email).filter(Boolean))).map(em => (
-                  <option key={em} value={em}>
-                    {em}
-                  </option>
-                ))}
-              </select>
-
               {/* Verdict Filter */}
               <div className="filter-pill-row">
                 {["all", "Phishing", "Legitimate"].map((vf) => (
@@ -648,7 +672,7 @@ const AdminPortal = () => {
                 className="cyber-btn-secondary btn-sm clear-danger-btn"
                 title="Purge global audit logs"
               >
-                <Trash2 size={15} /> Clear All
+                <Trash2 size={15} /> Clear Scans
               </button>
 
               <button onClick={loadScans} className="cyber-btn-secondary btn-sm" title="Refresh scans">
@@ -656,6 +680,58 @@ const AdminPortal = () => {
               </button>
             </div>
           </div>
+
+          {/* Dedicated User Button Selector Bar (Step 5 Requirement) */}
+          <div className="admin-user-pills-bar">
+            <div className="user-pills-title">
+              <Users size={15} /> Click User / Analyst Name to Inspect Their Scan Activity:
+            </div>
+            <div className="user-pills-list">
+              <button
+                type="button"
+                className={`user-pill-tab ${analystFilter === "all" ? "active" : ""}`}
+                onClick={() => setAnalystFilter("all")}
+              >
+                <Globe size={13} />
+                <span>All Users</span>
+                <span className="user-pill-counter">{scans.length}</span>
+              </button>
+              {users.map((u) => {
+                const uEmail = (u.email || "").toLowerCase();
+                const count = scans.filter(s => (s.user_email || "").toLowerCase() === uEmail).length;
+                return (
+                  <button
+                    key={u.email}
+                    type="button"
+                    className={`user-pill-tab ${analystFilter.toLowerCase() === uEmail ? "active" : ""}`}
+                    onClick={() => setAnalystFilter(u.email)}
+                    title={`Click to inspect scans by ${u.name} (${u.email})`}
+                  >
+                    <User size={13} />
+                    <span>{u.name || u.email}</span>
+                    <span className="user-pill-counter">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Active User Inspection Alert Banner */}
+          {analystFilter !== "all" && (
+            <div className="admin-filter-active-banner">
+              <div className="filter-banner-text">
+                <UserCheck size={16} />
+                <span>Inspecting scans for: <strong>{users.find(u => (u.email || "").toLowerCase() === analystFilter.toLowerCase())?.name || analystFilter}</strong> ({analystFilter})</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAnalystFilter("all")}
+                className="clear-user-filter-btn"
+              >
+                <X size={13} /> Show All Users
+              </button>
+            </div>
+          )}
 
           {scanLoading ? (
             <div className="empty-history-box">
@@ -748,7 +824,63 @@ const AdminPortal = () => {
         </div>
       )}
 
-      {/* TAB 3: ROLE PRIVILEGES & GOVERNANCE POLICIES */}
+      {/* TAB 3: USER INQUIRIES & SUPPORT MESSAGES */}
+      {activeTab === "support" && (
+        <div className="glass-card admin-card">
+          <div className="admin-card-header">
+            <div className="admin-card-title">
+              <Mail size={20} color="var(--terracotta)" />
+              <span>User Incident Reports & Support Messages ({supportMessages.length})</span>
+            </div>
+            <button onClick={loadSupportMessages} className="cyber-btn-secondary btn-sm">
+              <RefreshCw size={15} className={supportLoading ? "spin-icon" : ""} />
+              <span>Refresh Inquiries</span>
+            </button>
+          </div>
+
+          {supportLoading ? (
+            <div className="empty-history-box">
+              <RefreshCw size={36} className="spin-icon text-cyan" />
+              <p className="text-secondary">Retrieving user messages...</p>
+            </div>
+          ) : supportMessages.length === 0 ? (
+            <div className="empty-history-box">
+              <MessageSquare size={44} className="text-muted" />
+              <h4>No Support Inquiries Recorded</h4>
+              <p className="text-secondary">Users have not submitted any incident reports or questions yet.</p>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <table className="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Sender Name</th>
+                    <th>Email Address</th>
+                    <th>Subject</th>
+                    <th>Message Details</th>
+                    <th>Received At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {supportMessages.map((m) => (
+                    <tr key={m.id}>
+                      <td style={{ fontWeight: 600 }}>{m.name}</td>
+                      <td className="mono">{m.email}</td>
+                      <td>
+                        <span className="badge badge-warn">{m.subject}</span>
+                      </td>
+                      <td style={{ maxWidth: "340px", wordBreak: "break-word" }}>{m.message}</td>
+                      <td className="text-sm text-muted">{formatDate(m.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 4: ROLE PRIVILEGES & GOVERNANCE POLICIES */}
       {activeTab === "system" && (
         <div className="glass-card admin-card">
           <div className="admin-card-header">

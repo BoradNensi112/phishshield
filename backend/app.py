@@ -417,9 +417,13 @@ class RegisterRequest(BaseModel):
     password: str
     role: str = "SOC Security Analyst"
 
+ADMIN_MASTER_KEY = "PHISH_ADMIN_2026"
+
 class LoginRequest(BaseModel):
     email: str
     password: str
+    role_mode: str = "user"
+    admin_secret_key: str | None = None
 
 @app.post("/auth/register")
 @app.post("/api/auth/register")
@@ -471,11 +475,11 @@ def login_user(req: LoginRequest):
     password = req.password or ""
 
     if not email or not password:
-        raise HTTPException(status_code=400, detail="Email and password are required.")
+        raise HTTPException(status_code=400, detail="Incorrect credentials")
 
     user = database.get_user_by_email(email)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid analyst credentials or account not found.")
+        raise HTTPException(status_code=401, detail="Incorrect credentials")
 
     if user.get("status") == "suspended":
         raise HTTPException(status_code=403, detail="Account suspended by Administrator. Access denied.")
@@ -483,7 +487,7 @@ def login_user(req: LoginRequest):
     salt = user.get("salt", "")
     stored_hash = user.get("hashed_password", "")
     if not security.verify_password(password, salt, stored_hash):
-        raise HTTPException(status_code=401, detail="Incorrect password. Access denied.")
+        raise HTTPException(status_code=401, detail="Incorrect credentials")
 
     # Seamless migration: if user still had old SHA-256 hash, upgrade to PBKDF2
     if not stored_hash.startswith("pbkdf2_sha256$"):
@@ -499,12 +503,19 @@ def login_user(req: LoginRequest):
         or email == "neni112@gmail.com"
     )
 
+    # If logging in as Administrator, strictly verify Admin Secret Key and privileges
+    if req.role_mode == "admin":
+        if not req.admin_secret_key or req.admin_secret_key.strip() != ADMIN_MASTER_KEY:
+            raise HTTPException(status_code=401, detail="Incorrect credentials")
+        if not is_admin:
+            raise HTTPException(status_code=401, detail="Incorrect credentials")
+
     token = security.create_access_token({
         "sub": user["id"],
         "email": user["email"],
         "name": user["name"],
         "role": user["role"],
-        "is_admin": is_admin
+        "is_admin": is_admin and (req.role_mode == "admin" or is_admin)
     })
 
     return {
@@ -520,6 +531,38 @@ def login_user(req: LoginRequest):
         },
         "token": token
     }
+
+# ==========================================
+# SUPPORT & FEEDBACK MESSAGES
+# ==========================================
+
+class SupportMessageRequest(BaseModel):
+    name: str
+    email: str
+    subject: str = "Issue / Help Request"
+    message: str
+
+@app.post("/api/support/message")
+def submit_support_message(req: SupportMessageRequest):
+    name = (req.name or "").strip()
+    email = (req.email or "").strip().lower()
+    subject = (req.subject or "Issue / Help Request").strip()
+    msg = (req.message or "").strip()
+
+    if not name or not email or not msg:
+        raise HTTPException(status_code=400, detail="Name, email, and message are required.")
+
+    saved = database.create_support_message(name, email, subject, msg)
+    return {
+        "success": True,
+        "message": "Your incident / support request has been delivered to the Security Administrator.",
+        "data": saved
+    }
+
+@app.get("/api/admin/support/messages")
+def get_admin_support_messages(admin: dict = Depends(get_current_admin)):
+    return database.get_support_messages()
+
 
 # ==========================================
 # USER PROFILE & SETTINGS (PROTECTED)

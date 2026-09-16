@@ -79,6 +79,20 @@ def init_db():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_scans_user_email ON scans(user_email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_scans_timestamp ON scans(timestamp);")
 
+        # 3. Support & Incident Messages Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS support_messages (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                message TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'unread',
+                created_at TEXT NOT NULL
+            );
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_support_created ON support_messages(created_at);")
+
         # Check if migration is needed
         cursor.execute("SELECT COUNT(*) FROM users")
         user_count = cursor.fetchone()[0]
@@ -383,3 +397,37 @@ def get_user_scan_stats(user_email: str):
             "safe_count": row["safe_count"] or 0,
             "high_risk_count": row["high_risk_count"] or 0
         }
+
+# ==========================================
+# SUPPORT & INCIDENT MESSAGES
+# ==========================================
+
+def create_support_message(name: str, email: str, subject: str, message: str):
+    msg_id = f"msg_{int(datetime.datetime.now().timestamp() * 1000)}_{os.urandom(2).hex()}"
+    created_at = datetime.datetime.now().isoformat() + "Z"
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO support_messages (id, name, email, subject, message, status, created_at)
+            VALUES (?, ?, ?, ?, ?, 'unread', ?)
+        """, (msg_id, name.strip(), email.strip().lower(), subject.strip(), message.strip(), created_at))
+    return {
+        "id": msg_id,
+        "name": name.strip(),
+        "email": email.strip().lower(),
+        "subject": subject.strip(),
+        "message": message.strip(),
+        "status": "unread",
+        "created_at": created_at
+    }
+
+def get_support_messages(limit: int = 100):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM support_messages 
+            ORDER BY datetime(created_at) DESC 
+            LIMIT ?
+        """, (limit,))
+        return [dict(r) for r in cursor.fetchall()]
+

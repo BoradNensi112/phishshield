@@ -47,28 +47,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (email, password, roleMode = "user", adminSecretKey = null) => {
     setLoading(true);
     const cleanEmail = (email || "").trim().toLowerCase();
     const cleanPass = password || "";
 
     try {
       // 1. Try Live FastAPI Backend
-      const res = await apiService.login({ email: cleanEmail, password: cleanPass });
+      const res = await apiService.login({
+        email: cleanEmail,
+        password: cleanPass,
+        role_mode: roleMode,
+        admin_secret_key: adminSecretKey
+      });
       if (res && res.user) {
+        if (res.token) {
+          localStorage.setItem("phishshield_token", res.token);
+        }
         setCurrentUser(res.user);
         setLoading(false);
         return { success: true, user: res.user };
       }
     } catch (err) {
-      // If backend responded with 400/401, check the detail error
+      setLoading(false);
       if (err.response && err.response.data && err.response.data.detail) {
-        // Known credential failure from backend
-        setLoading(false);
         throw new Error(err.response.data.detail);
       }
-      // If network offline or backend sleeping, attempt resilient client fallback
-      console.warn("Backend unavailable, attempting offline client auth fallback...");
+      throw new Error("Incorrect credentials");
     }
 
     // 2. Resilient Offline / Demo fallback

@@ -1,7 +1,7 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -20,6 +20,12 @@ import AdminRoute from "./components/AdminRoute";
 
 import "./css/index.css";
 
+// Root entry point: Lands directly on Login page if unauthenticated
+const RootRedirect = () => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Scanner /> : <Navigate to="/login" replace />;
+};
+
 function App() {
   return (
     <ThemeProvider>
@@ -29,7 +35,9 @@ function App() {
             <Navbar />
             <main className="main-content">
               <Routes>
-                <Route path="/" element={<Home />} />
+                {/* Default Entry Point: Direct Login */}
+                <Route path="/" element={<RootRedirect />} />
+                <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 <Route path="/about" element={<About />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />

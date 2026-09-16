@@ -137,6 +137,16 @@ export const apiService = {
     return response.data;
   },
 
+  sendSupportMessage: async (msgData) => {
+    const response = await apiClient.post("/api/support/message", msgData);
+    return response.data;
+  },
+
+  getAdminSupportMessages: async () => {
+    const response = await apiClient.get("/api/admin/support/messages");
+    return response.data;
+  },
+
   getConfusionMatrixUrl: () => `${API_BASE_URL || ""}/static/model/confusion_matrix.png`,
 };
 

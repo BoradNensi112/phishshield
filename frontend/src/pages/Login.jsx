@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Shield, Lock, Mail, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle2, Zap, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Shield, Lock, Mail, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle2, ShieldCheck, ShieldAlert, Key } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, quickDemoLogin, quickAdminLogin, isAuthenticated, currentUser } = useAuth();
+  const { login } = useAuth();
 
+  const [roleMode, setRoleMode] = useState("user"); // "user" or "admin"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [adminSecretKey, setAdminSecretKey] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,47 +25,69 @@ const Login = () => {
     setError("");
 
     if (!email.trim() || !password) {
-      setError("Please provide both email and password.");
+      setError("Incorrect credentials");
+      return;
+    }
+
+    if (roleMode === "admin" && !adminSecretKey.trim()) {
+      setError("Incorrect credentials");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await login(email, password);
-      navigate(redirectPath);
+      await login(email, password, roleMode, roleMode === "admin" ? adminSecretKey.trim() : null);
+      if (roleMode === "admin") {
+        navigate("/admin");
+      } else {
+        navigate(redirectPath);
+      }
     } catch (err) {
-      setError(err.message || "Authentication failed. Check credentials.");
+      setError("Incorrect credentials");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDemoLogin = () => {
-    quickDemoLogin("Lead SOC Analyst");
-    navigate(redirectPath);
-  };
-
-  const handleAdminLogin = () => {
-    quickAdminLogin();
-    navigate("/admin");
-  };
-
   return (
     <div className="auth-page-container">
       <div className="auth-card-wrapper">
-        {/* Glow ambient background element */}
-        <div className="auth-glow-effect"></div>
-
-        <div className="auth-card">
+        <div className="auth-card glass-card">
           {/* Header */}
           <div className="auth-header">
             <div className="auth-logo-badge">
               <Shield className="auth-logo-icon" size={36} />
             </div>
-            <h1 className="auth-title">SOC Access Control</h1>
+            <h1 className="auth-title">PhishShield Terminal</h1>
             <p className="auth-subtitle">
-              CYBER DEFENSE OPERATIONS // SECURE AUTHENTICATION
+              CYBER DEFENSE PLATFORM // SECURE ACCESS
             </p>
+          </div>
+
+          {/* Role Selector Tabs (User by default, Admin with Secret Key) */}
+          <div className="auth-role-tabs">
+            <button
+              type="button"
+              className={`auth-role-tab ${roleMode === "user" ? "active" : ""}`}
+              onClick={() => {
+                setRoleMode("user");
+                setError("");
+              }}
+            >
+              <ShieldCheck size={16} />
+              <span>User / Analyst</span>
+            </button>
+            <button
+              type="button"
+              className={`auth-role-tab ${roleMode === "admin" ? "active" : ""}`}
+              onClick={() => {
+                setRoleMode("admin");
+                setError("");
+              }}
+            >
+              <ShieldAlert size={16} />
+              <span>Administrator</span>
+            </button>
           </div>
 
           {/* Success Banner after registration */}
@@ -82,48 +106,7 @@ const Login = () => {
             </div>
           )}
 
-          {/* Quick Demo Access banner (Super helpful for Viva/Examiner testing) */}
-          <div className="demo-login-box">
-            <div className="demo-box-header">
-              <Zap size={16} className="demo-zap-icon" />
-              <span>Instant Presentation & Viva Access</span>
-            </div>
-            <p className="demo-box-text">
-              Testing or evaluating? Tap below to bypass credential entry with pre-configured SOC privileges.
-            </p>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "10px" }}>
-              <button
-                type="button"
-                onClick={handleAdminLogin}
-                className="demo-login-btn"
-                style={{ 
-                  flex: 1, 
-                  minWidth: "200px", 
-                  background: "rgba(168, 85, 247, 0.18)", 
-                  borderColor: "rgba(168, 85, 247, 0.5)", 
-                  color: "#d8b4fe" 
-                }}
-              >
-                <ShieldAlert size={18} />
-                <span>1-Click SOC Administrator</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                className="demo-login-btn"
-                style={{ flex: 1, minWidth: "200px" }}
-              >
-                <ShieldCheck size={18} />
-                <span>1-Click Lead Analyst</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="auth-divider">
-            <span>OR MANUAL CREDENTIALS</span>
-          </div>
-
-          {/* Error Alert */}
+          {/* Generic Error Alert */}
           {error && (
             <div className="auth-error-banner" role="alert">
               <AlertCircle size={18} className="auth-error-icon" />
@@ -135,7 +118,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="auth-input-group">
               <label htmlFor="email" className="auth-label">
-                Analyst Work Email
+                {roleMode === "admin" ? "Administrator Email" : "User / Analyst Email"}
               </label>
               <div className="auth-input-wrapper">
                 <Mail className="auth-field-icon" size={18} />
@@ -143,12 +126,10 @@ const Login = () => {
                   id="email"
                   type="email"
                   className="auth-input"
-                  placeholder="analyst@phishshield.com"
+                  placeholder={roleMode === "admin" ? "admin@phishshield.com" : "analyst@phishshield.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="off"
-                  data-lpignore="true"
-                  style={{ backgroundColor: "#0e1526", color: "#f8fafc" }}
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -157,7 +138,7 @@ const Login = () => {
             <div className="auth-input-group">
               <div className="auth-label-row">
                 <label htmlFor="password" className="auth-label">
-                  Access Password
+                  Security Password
                 </label>
               </div>
               <div className="auth-input-wrapper">
@@ -170,8 +151,6 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
-                  data-lpignore="true"
-                  style={{ backgroundColor: "#0e1526", color: "#f8fafc" }}
                   required
                 />
                 <button
@@ -185,6 +164,34 @@ const Login = () => {
               </div>
             </div>
 
+            {/* Dynamic 3rd Field for Administrator Secret Key */}
+            {roleMode === "admin" && (
+              <div className="auth-input-group animated-fadeIn">
+                <div className="auth-label-row">
+                  <label htmlFor="adminSecretKey" className="auth-label">
+                    Admin Secret Clearance Key
+                  </label>
+                  <span className="auth-role-tag-badge">Master Code Required</span>
+                </div>
+                <div className="auth-input-wrapper">
+                  <Key className="auth-field-icon" size={18} />
+                  <input
+                    id="adminSecretKey"
+                    type="password"
+                    className="auth-input"
+                    placeholder="Enter Admin Master Key"
+                    value={adminSecretKey}
+                    onChange={(e) => setAdminSecretKey(e.target.value)}
+                    autoComplete="off"
+                    required={roleMode === "admin"}
+                  />
+                </div>
+                <p className="auth-code-hint">
+                  Master Code: <code>PHISH_ADMIN_2026</code>
+                </p>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isSubmitting}
@@ -194,17 +201,17 @@ const Login = () => {
                 <span className="auth-loading-spinner">Verifying Credentials...</span>
               ) : (
                 <>
-                  <span>Authenticate & Open Terminal</span>
+                  <span>{roleMode === "admin" ? "Sign In as Administrator" : "Sign In to Terminal"}</span>
                   <ArrowRight size={18} />
                 </>
               )}
             </button>
           </form>
 
-          {/* Switch to Register */}
+          {/* Clear Switch to Register */}
           <div className="auth-footer-nav">
             <p>
-              Don't have an analyst account?{" "}
+              Don't have an account?{" "}
               <Link to="/register" className="auth-link">
                 Register New Credentials
               </Link>
