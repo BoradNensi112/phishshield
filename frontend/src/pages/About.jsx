@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { 
   ShieldCheck, Radar, History, UserCheck, Send, 
-  HelpCircle, CheckCircle2, AlertCircle, ArrowRight, ShieldAlert, MessageSquare 
+  HelpCircle, CheckCircle2, AlertCircle, ArrowRight, ShieldAlert, 
+  MessageSquare, Compass, ExternalLink, Lock, Check, Info, FileQuestion
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import apiService from "../services/api";
@@ -34,7 +36,7 @@ const About = () => {
       });
       setNotice({ 
         type: "success", 
-        msg: "Your message has been delivered to the Security Administrator! They will inspect your inquiry." 
+        msg: "Your message has been delivered to the Security Administrator! They will review your inquiry." 
       });
       setMessage("");
     } catch (err) {
@@ -48,19 +50,50 @@ const About = () => {
     <div className="about-page-container">
       {/* Header */}
       <div className="page-header">
-        <div className="header-badge">SECURITY PLATFORM GUIDE & SUPPORT</div>
+        <div className="header-badge">SECURITY PLATFORM USER GUIDE & SUPPORT</div>
         <h2>About PhishShield</h2>
-        <p>Comprehensive Threat Intelligence Guide & Direct Security Administration Help Desk</p>
+        <p>Comprehensive Threat Intelligence Platform Guide & Direct Administrator Help Desk</p>
       </div>
 
-      {/* SECTION 1: KYA KAR SAKTE HAIN (PLATFORM CAPABILITIES) */}
+      {/* Quick Overview Hero Card */}
+      <div className="about-hero-card glass-card">
+        <div className="about-hero-content">
+          <div className="about-hero-badge">
+            <ShieldCheck size={16} />
+            <span>AI & Heuristic Defense Terminal</span>
+          </div>
+          <h3>Welcome to PhishShield Cyber Defense</h3>
+          <p>
+            PhishShield is an intelligent web security terminal designed to protect users and organizations against deceptive links, credential phishing, fake banking portals, and social engineering attacks. By analyzing 33 structural and lexical parameters of any web address, PhishShield provides instant, safe verdicts before you ever click.
+          </p>
+          <div className="about-hero-pills">
+            <Link to={isAuthenticated ? "/scanner" : "/login"} className="about-pill-link primary">
+              <Radar size={15} />
+              <span>Launch URL Scanner</span>
+              <ArrowRight size={14} />
+            </Link>
+            {isAuthenticated && (
+              <Link to="/history" className="about-pill-link">
+                <History size={15} />
+                <span>My Scan History</span>
+              </Link>
+            )}
+            <a href="#support-desk" className="about-pill-link">
+              <MessageSquare size={15} />
+              <span>Contact Administrator</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 1: WHAT YOU CAN DO (PLATFORM CAPABILITIES) */}
       <div className="about-section-block">
         <div className="section-title-wrap">
           <ShieldCheck size={22} className="text-sage" />
-          <h3 className="section-heading">Kya Kar Sakte Hain? (What PhishShield Does)</h3>
+          <h3 className="section-heading">What PhishShield Does (Platform Capabilities)</h3>
         </div>
         <p className="section-subtext">
-          PhishShield ek advanced cyber defense terminal hai jo internet par aane wali shaq wali aur farzi links (phishing scams) se aapko surakshit rakhta hai.
+          Explore how PhishShield shields you from zero-day phishing websites and deceptive online threats.
         </p>
 
         <div className="tactile-features-grid">
@@ -70,7 +103,7 @@ const About = () => {
             </div>
             <h4>Instant Threat Detection</h4>
             <p>
-              Kisi bhi URL ko kholne se pehle check karein. Hamara system fake banking portals, duplicate social media login pages, aur fraud links ko seconds me identify karta hai.
+              Check any link before opening it in your browser. The system evaluates IP spoofing, character repeats, brand-squatting, and URL length within seconds.
             </p>
           </div>
 
@@ -78,9 +111,9 @@ const About = () => {
             <div className="feature-icon-circle icon-green">
               <ShieldCheck size={24} />
             </div>
-            <h4>Safe & Heuristic Analysis</h4>
+            <h4>Isolated & Safe Heuristic Analysis</h4>
             <p>
-              Ye tool direct dangerous website par jakar aapka computer kharab nahi karta, balki URL string ke lakshan (patterns) dekh kar safe verdict deta hai.
+              Your device stays safe. PhishShield never visits malware-infected destinations directly on your machine, instead parsing pure URL anatomy and DNS indicators.
             </p>
           </div>
 
@@ -88,9 +121,9 @@ const About = () => {
             <div className="feature-icon-circle icon-stone">
               <History size={24} />
             </div>
-            <h4>Personal Scan History & Bulk Delete</h4>
+            <h4>Private User Scan History</h4>
             <p>
-              Aapne jo jo links scan ki hain, wo sirf aapke private account me save rehti hain. Aap unhe filter kar sakte hain, CSV me export kar sakte hain ya ek click me delete kar sakte hain.
+              Every scan you conduct is logged strictly to your own private account. Filter by date, export forensic audit summaries to CSV, or bulk delete past records.
             </p>
           </div>
 
@@ -98,67 +131,115 @@ const About = () => {
             <div className="feature-icon-circle icon-blue">
               <UserCheck size={24} />
             </div>
-            <h4>Centralized Admin Governance</h4>
+            <h4>Centralized SOC Governance</h4>
             <p>
-              Organization heads aur Administrators poore system ke users manage kar sakte hain, security accounts suspend/activate kar sakte hain, aur global threat logs inspect kar sakte hain.
+              Organization administrators can audit organization-wide telemetry, inspect user-specific scans with one click, manage analyst roles, and review support inquiries.
             </p>
           </div>
         </div>
       </div>
 
-      {/* SECTION 2: KAISE KAR SAKTE HAIN (4-STEP HOW-TO GUIDE) */}
+      {/* SECTION 2: HOW TO USE PHISHSHIELD (4-STEP WALKTHROUGH) */}
       <div className="about-section-block">
         <div className="section-title-wrap">
           <HelpCircle size={22} className="text-terracotta" />
-          <h3 className="section-heading">Kaise Kar Sakte Hain? (How to Use PhishShield in 4 Steps)</h3>
+          <h3 className="section-heading">How to Use PhishShield in 4 Easy Steps</h3>
         </div>
+        <p className="section-subtext">
+          Follow this straightforward workflow whenever you encounter a suspicious email, message, or website link.
+        </p>
 
         <div className="how-to-steps-container">
           <div className="how-to-step-card glass-card">
             <div className="step-number-badge">1</div>
             <h4>Sign In to Terminal</h4>
             <p>
-              Apna work email aur password daal kar login karein. Agar naye hain to "Register" par click karke naya account banayein.
+              Access your analyst workspace with your email and password. New users can quickly register an account right from the login screen.
             </p>
+            <div className="step-tag">Authentication</div>
           </div>
 
           <div className="how-to-step-card glass-card">
             <div className="step-number-badge">2</div>
-            <h4>Paste Suspicious URL</h4>
+            <h4>Paste the Suspicious URL</h4>
             <p>
-              Navigation bar se <strong>"URL Scanner"</strong> tab par jayein aur jo link shaq wali lag rahi hai, use input box me paste karein.
+              Navigate to the <strong>"URL Scanner"</strong> tab and paste the complete web link received via SMS, email, WhatsApp, or browser popup.
             </p>
+            <div className="step-tag">Input Phase</div>
           </div>
 
           <div className="how-to-step-card glass-card">
             <div className="step-number-badge">3</div>
-            <h4>Analyze Result</h4>
+            <h4>Analyze & Review Verdict</h4>
             <p>
-              <strong>"Analyze Threat"</strong> button dabayein. System aapko <em>Safe (Clean)</em> ya <em>Phishing (Malicious)</em> ka clear verdict aur threat score dikhayega.
+              Click <strong>"Analyze Threat"</strong>. Instantly review the confidence score, risk tier (Safe, Low, Medium, High), and detailed risk reasons.
             </p>
+            <div className="step-tag">AI Evaluation</div>
           </div>
 
           <div className="how-to-step-card glass-card">
             <div className="step-number-badge">4</div>
-            <h4>Manage Scan Records</h4>
+            <h4>Manage or Export Scans</h4>
             <p>
-              <strong>"Scan History"</strong> me jakar purane scans dekhein, checkboxes tick karke bulk delete karein ya reports CSV me download karein.
+              Check your <strong>"Scan History"</strong> to review past verifications, download individual PDF audit reports, or export clean CSV files.
+            </p>
+            <div className="step-tag">Forensic Logging</div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 3: FREQUENTLY ASKED QUESTIONS */}
+      <div className="about-section-block">
+        <div className="section-title-wrap">
+          <FileQuestion size={22} className="text-sage" />
+          <h3 className="section-heading">Frequently Asked Questions (FAQ)</h3>
+        </div>
+        <p className="section-subtext">
+          Answers to common questions about phishing detection, privacy, and system behavior.
+        </p>
+
+        <div className="faq-grid">
+          <div className="glass-card faq-card">
+            <h4><HelpCircle size={16} className="text-sage" /> Does PhishShield visit or execute malicious code?</h4>
+            <p>
+              No. PhishShield inspects lexical features, structural characteristics, and DNS lookup records without executing unsafe client scripts or downloading untrusted files.
+            </p>
+          </div>
+
+          <div className="glass-card faq-card">
+            <h4><HelpCircle size={16} className="text-sage" /> Who can see the links I have scanned?</h4>
+            <p>
+              Your personal scan history is strictly isolated to your user profile. Other standard analysts cannot see your scans; only authorized SOC Administrators can inspect global audit logs.
+            </p>
+          </div>
+
+          <div className="glass-card faq-card">
+            <h4><HelpCircle size={16} className="text-sage" /> What should I do if a genuine link is flagged?</h4>
+            <p>
+              Legitimate internal or unusual domains can occasionally trigger heuristic rules. Use the contact form below to notify the Administrator for manual whitelist review.
+            </p>
+          </div>
+
+          <div className="glass-card faq-card">
+            <h4><HelpCircle size={16} className="text-sage" /> How do I get Administrator clearance?</h4>
+            <p>
+              Administrator access requires the official Master Clearance Key (<code>PHISH_ADMIN_2026</code>) during sign-in and is reserved for organizational security leads.
             </p>
           </div>
         </div>
       </div>
 
-      {/* SECTION 3: CONTACT ADMIN & SUPPORT DESK (PROBLEM SOLUTION) */}
-      <div className="about-section-block">
+      {/* SECTION 4: CONTACT ADMIN SUPPORT FORM */}
+      <div className="about-section-block" id="support-desk">
         <div className="glass-card support-form-card">
           <div className="support-form-header">
             <div className="support-icon-wrap">
               <MessageSquare size={26} color="var(--terracotta)" />
             </div>
             <div>
-              <h3>Koi Problem Aayi? Admin Ko Inform Karein</h3>
+              <h3>Have a Question or Found an Issue? Contact Security Admin</h3>
               <p>
-                Agar kisi link ka result galat laga ho, scan me error aaya ho, ya account related koi sawaal ho, to niche message bhej kar seedha Administrator se contact karein.
+                Encountered a false positive, scanning error, or have questions regarding your account clearance? Submit an inquiry directly to the SOC Administrator.
               </p>
             </div>
           </div>
@@ -173,7 +254,7 @@ const About = () => {
           <form onSubmit={handleSubmitMessage} className="support-message-form">
             <div className="support-form-grid">
               <div className="support-input-group">
-                <label>Aapka Naam (Name):</label>
+                <label>Your Name:</label>
                 <input
                   type="text"
                   className="cyber-input"
@@ -198,7 +279,7 @@ const About = () => {
             </div>
 
             <div className="support-input-group">
-              <label>Kis Baare Me Help Chahiye? (Subject):</label>
+              <label>Topic / Subject:</label>
               <select
                 className="admin-role-select"
                 value={subject}
@@ -213,32 +294,36 @@ const About = () => {
             </div>
 
             <div className="support-input-group">
-              <label>Aapka Message / Detail Problem:</label>
+              <label>Your Message / Issue Details:</label>
               <textarea
                 className="cyber-input"
                 rows="4"
-                placeholder="Yahan apni problem ya sawaal likhein..."
+                placeholder="Explain what happened or include the specific URL you need assistance with..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="cyber-btn-primary"
-              style={{ alignSelf: "flex-start", marginTop: "8px" }}
-            >
-              {submitting ? (
-                <span>Sending Message to Admin...</span>
-              ) : (
-                <>
-                  <Send size={16} />
-                  <span>Send Message to Administrator</span>
-                </>
-              )}
-            </button>
+            <div className="support-submit-row">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="cyber-btn-primary"
+              >
+                {submitting ? (
+                  <span>Sending Message to Admin...</span>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    <span>Send Message to Administrator</span>
+                  </>
+                )}
+              </button>
+              <span className="support-help-hint">
+                <Info size={14} /> Messages are logged securely to the administrator console.
+              </span>
+            </div>
           </form>
         </div>
       </div>
