@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Shield, ShieldAlert, Sun, Moon, Activity, Radar, History, BarChart3, Info, Menu, X, LogIn, UserPlus, LogOut, User, CheckCircle2, Lock } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -12,6 +12,22 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [apiOnline, setApiOnline] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef(null);
+
+  // Measure and set exact header height dynamically
+  useEffect(() => {
+    const updateHeight = () => {
+      if (headerRef.current) {
+        document.documentElement.style.setProperty(
+          "--tactile-header-height",
+          `${headerRef.current.offsetHeight}px`
+        );
+      }
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, [isAuthenticated, location.pathname, isAdmin]);
 
   useEffect(() => {
     const checkApi = async () => {
@@ -61,7 +77,7 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="tactile-header-wrapper">
+      <header className="tactile-header-wrapper" ref={headerRef}>
         {/* Tier 1: Brand & User Profile / Status Controls */}
         <div className="header-top-tier">
           <div className="top-tier-container">
@@ -172,6 +188,11 @@ const Navbar = () => {
           </nav>
         )}
       </header>
+      {/* Structural spacer matching fixed header height */}
+      <div 
+        className={`tactile-header-spacer ${isAuthenticated ? "has-subtier" : "no-subtier"}`} 
+        aria-hidden="true" 
+      />
 
       {/* Mobile Navigation Drawer & Backdrop */}
       {mobileMenuOpen && (

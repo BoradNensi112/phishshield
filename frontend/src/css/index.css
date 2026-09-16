@@ -4603,11 +4603,12 @@ select:-webkit-autofill,
    TACTILE MATTE CERAMIC DESIGN SYSTEM & 2-TIER HEADER
    =================================================================== */
 
-/* 2-Tier Header Architecture */
+/* 2-Tier Header Architecture - Permanently Fixed at Top */
 .tactile-header-wrapper {
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   width: 100%;
   z-index: 1000;
   background: var(--nav-bg);
@@ -4615,6 +4616,18 @@ select:-webkit-autofill,
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Header Spacer: Maintains layout flow so content does not get hidden under fixed header */
+.tactile-header-spacer {
+  width: 100%;
+  pointer-events: none;
+  visibility: hidden;
+  height: var(--tactile-header-height, 114px);
+}
+
+.tactile-header-spacer.no-subtier {
+  height: var(--tactile-header-height, 65px);
 }
 
 .header-top-tier {
