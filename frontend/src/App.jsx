@@ -14,6 +14,7 @@ import About from "./pages/About";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminPortal from "./pages/AdminPortal";
+import UserProfile from "./pages/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -55,6 +56,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ScanHistory />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <UserProfile />
                     </ProtectedRoute>
                   }
                 />

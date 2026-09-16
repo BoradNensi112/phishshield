@@ -56,6 +56,7 @@ const Navbar = () => {
     { path: "/history", label: "Scan History", icon: <History size={18} />, isProtected: true },
     { path: "/model", label: "Model Metrics", icon: <Activity size={18} />, isProtected: true },
     ...(isAdmin ? [{ path: "/admin", label: "Admin Console", icon: <ShieldAlert size={18} />, isProtected: true }] : []),
+    ...(isAuthenticated ? [{ path: "/profile", label: "My Profile", icon: <User size={18} />, isProtected: true }] : []),
     { path: "/about", label: "About", icon: <Info size={18} />, isProtected: false },
   ];
 
@@ -98,13 +99,15 @@ const Navbar = () => {
             <div className="nav-auth-controls desktop-only">
               {isAuthenticated ? (
                 <div className="nav-user-profile-badge">
-                  <div className="user-avatar-circle">
-                    <User size={15} />
-                  </div>
-                  <div className="user-info-text">
-                    <span className="user-display-name">{currentUser?.name || "Analyst"}</span>
-                    <span className="user-role-tag">{currentUser?.role || "SOC Analyst"}</span>
-                  </div>
+                  <Link to="/profile" className="nav-profile-link-wrapper" title="Open Analyst Profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+                    <div className="user-avatar-circle">
+                      <User size={15} />
+                    </div>
+                    <div className="user-info-text">
+                      <span className="user-display-name">{currentUser?.name || "Analyst"}</span>
+                      <span className="user-role-tag">{currentUser?.role || "SOC Analyst"}</span>
+                    </div>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="nav-logout-btn"
@@ -185,7 +188,12 @@ const Navbar = () => {
             <div className="mobile-drawer-auth-block">
               {isAuthenticated ? (
                 <div className="mobile-user-card">
-                  <div className="mobile-user-header">
+                  <Link 
+                    to="/profile" 
+                    className="mobile-user-header" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
                     <div className="user-avatar-circle">
                       <User size={18} />
                     </div>
@@ -193,7 +201,7 @@ const Navbar = () => {
                       <span className="mobile-user-name">{currentUser?.name}</span>
                       <span className="mobile-user-email">{currentUser?.email}</span>
                     </div>
-                  </div>
+                  </Link>
                   <div className="mobile-user-actions">
                     <span className="mobile-user-badge">{currentUser?.role || "SOC Analyst"}</span>
                     <button onClick={handleLogout} className="mobile-logout-btn">

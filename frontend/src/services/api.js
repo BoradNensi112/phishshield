@@ -12,6 +12,17 @@ const apiClient = axios.create({
   timeout: 15000,
 });
 
+// Automatic JWT Bearer Authorization Interceptor
+apiClient.interceptors.request.use((config) => {
+  try {
+    const token = localStorage.getItem("phishshield_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (e) {}
+  return config;
+});
+
 export const apiService = {
   getHealth: async () => {
     const response = await apiClient.get("/health");
@@ -58,6 +69,30 @@ export const apiService = {
 
   clearScans: async (userEmail) => {
     const response = await apiClient.delete("/scans", { params: { user_email: userEmail } });
+    return response.data;
+  },
+
+  bulkDeleteScans: async (scanIds, userEmail = null) => {
+    const response = await apiClient.post("/api/scans/bulk-delete", {
+      scan_ids: scanIds,
+      user_email: userEmail
+    });
+    return response.data;
+  },
+
+  // User Profile & Settings Endpoints
+  getUserProfile: async () => {
+    const response = await apiClient.get("/api/user/profile");
+    return response.data;
+  },
+
+  updateUserProfile: async (userData) => {
+    const response = await apiClient.put("/api/user/profile", userData);
+    return response.data;
+  },
+
+  changePassword: async (passData) => {
+    const response = await apiClient.put("/api/user/change-password", passData);
     return response.data;
   },
 

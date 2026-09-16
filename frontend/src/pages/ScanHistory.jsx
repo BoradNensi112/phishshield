@@ -26,6 +26,8 @@ const ScanHistory = () => {
 
   const [customDate, setCustomDate] = useState(getTodayStr());
   const [copiedId, setCopiedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const navigate = useNavigate();
 
   const loadHistory = async () => {
@@ -84,6 +86,13 @@ const ScanHistory = () => {
     // Optimistically update UI
     const updated = history.filter((item) => item.id !== id);
     setHistory(updated);
+    if (selectedIds.has(id)) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
 
     const currEmail = (currentUser?.email || "").toLowerCase().trim();
 
@@ -110,6 +119,7 @@ const ScanHistory = () => {
     const confirmMsg = "Are you sure you want to permanently delete all your private scan records? This cannot be undone.";
     if (window.confirm(confirmMsg)) {
       setHistory([]);
+      setSelectedIds(new Set());
       const currEmail = (currentUser?.email || "").toLowerCase().trim();
 
       // 1. Purge from backend database permanently
@@ -132,6 +142,98 @@ const ScanHistory = () => {
         console.error(e);
       }
     }
+  };
+
+  const handleToggleSelectAll = () => {
+    const allIds = filtered.map((r) => r.id).filter(Boolean);
+    const isAllSelected = allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
+    if (isAllSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(allIds));
+    }
+  };
+
+  const handleToggleSelectOne = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    const confirmMsg = `Are you sure you want to permanently delete ${count} selected scan records? This action cannot be undone.`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setIsBulkDeleting(true);
+    const idsToDelete = Array.from(selectedIds);
+
+    // Optimistically update UI
+    setHistory((prev) => prev.filter((item) => !selectedIds.has(item.id)));
+    setSelectedIds(new Set());
+
+    const currEmail = (currentUser?.email || "").toLowerCase().trim();
+
+    try {
+      await apiService.bulkDeleteScans(idsToDelete, currEmail || null);
+    } catch (e) {
+      console.error("Bulk delete failed on backend:", e);
+    }
+
+    try {
+      const stored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
+      const filteredLocal = stored.filter((item) => !idsToDelete.includes(item.id));
+      localStorage.setItem("phishshield_history", JSON.stringify(filteredLocal));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const handleExportSelectedCSV = () => {
+    const selectedItems = filtered.filter((h) => selectedIds.has(h.id));
+    if (selectedItems.length === 0) return;
+    const headers = [
+      "ID",
+      "Analyst Email",
+      "URL",
+      "Prediction",
+      "Confidence",
+      "ThreatScore",
+      "RiskLevel",
+      "Tier",
+      "Timestamp"
+    ];
+    const rows = selectedItems.map((h) => [
+      h.id,
+      `"${h.user_email || currentUser?.email || "analyst"}"`,
+      `"${(h.url || "").replace(/"/g, '""')}"`,
+      h.prediction,
+      h.confidence,
+      h.risk_score,
+      h.risk_level,
+      `"${h.tier || "Random Forest"}"`,
+      `"${h.timestamp}"`,
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `phishshield_selected_scans_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleCopy = (url, id) => {
@@ -461,6 +563,38 @@ const ScanHistory = () => {
         </div>
       </div>
 
+      {/* Bulk Actions Floating Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bulk-actions-toolbar glass-card">
+          <div className="bulk-info-group">
+            <span className="bulk-badge">{selectedIds.size}</span>
+            <span className="bulk-label">Records Selected</span>
+            <button onClick={() => setSelectedIds(new Set())} className="bulk-clear-link">
+              Deselect all
+            </button>
+          </div>
+          <div className="bulk-btn-group">
+            <button
+              onClick={handleExportSelectedCSV}
+              className="cyber-btn-secondary btn-sm"
+              title="Export selected scans to CSV"
+            >
+              <Download size={14} />
+              <span>Export Selected ({selectedIds.size})</span>
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={isBulkDeleting}
+              className="cyber-btn-secondary btn-sm clear-danger-btn"
+              title="Permanently delete selected records"
+            >
+              <Trash2 size={14} />
+              <span>{isBulkDeleting ? "Deleting..." : `Delete Selected (${selectedIds.size})`}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* History Table Card */}
       <div className="history-table-card glass-card">
         {loading ? (
@@ -492,6 +626,16 @@ const ScanHistory = () => {
             <table className="cyber-table">
               <thead>
                 <tr>
+                  <th style={{ width: "40px", textAlign: "center" }}>
+                    <input
+                      type="checkbox"
+                      className="cyber-checkbox"
+                      checked={filtered.length > 0 && filtered.every((r) => selectedIds.has(r.id))}
+                      onChange={handleToggleSelectAll}
+                      title="Select / Deselect all visible records"
+                      aria-label="Select all visible records"
+                    />
+                  </th>
                   <th>Target URL</th>
                   <th>Verdict</th>
                   <th>Confidence</th>
@@ -503,7 +647,20 @@ const ScanHistory = () => {
               </thead>
               <tbody>
                 {filtered.map((row) => (
-                  <tr key={row.id || `${row.url}_${row.timestamp}`}>
+                  <tr 
+                    key={row.id || `${row.url}_${row.timestamp}`}
+                    className={selectedIds.has(row.id) ? "row-selected" : ""}
+                  >
+                    <td style={{ textAlign: "center" }}>
+                      <input
+                        type="checkbox"
+                        className="cyber-checkbox"
+                        checked={selectedIds.has(row.id)}
+                        onChange={() => handleToggleSelectOne(row.id)}
+                        title="Select row"
+                        aria-label={`Select scan ${row.url}`}
+                      />
+                    </td>
                     <td className="mono truncate-url-col">
                       <div className="url-flex-cell">
                         <span className="cell-url-text" title={row.url}>{row.url}</span>

@@ -5,14 +5,67 @@ import joblib
 import socket
 import numpy as np
 from urllib.parse import urlparse, unquote
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+
+import database
+import security
 
 from utils.feature_extractor import FEATURE_NAMES, extract_features, extract_threat_reasons
 from utils.whitelist import is_whitelisted
+
+# Initialize SQLite database schema and migrate data
+database.init_db()
+
+security_bearer = HTTPBearer(auto_error=False)
+
+def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security_bearer)):
+    """Authenticate and extract user from Bearer JWT token."""
+    if not credentials or not credentials.credentials:
+        raise HTTPException(status_code=401, detail="Authentication token required. Please sign in.")
+    token = credentials.credentials
+    payload = security.decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Session expired or invalid token. Please log in again.")
+
+    email = payload.get("email")
+    user = database.get_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=401, detail="User account not found.")
+    if user.get("status") == "suspended":
+        raise HTTPException(status_code=403, detail="Your account has been suspended by the SOC Administrator.")
+    return user
+
+def get_current_admin(credentials: HTTPAuthorizationCredentials | None = Depends(security_bearer)):
+    """Authenticate and verify SOC Administrator clearance."""
+    if not credentials or not credentials.credentials:
+        raise HTTPException(status_code=401, detail="Administrator authentication token required.")
+    token = credentials.credentials
+    payload = security.decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Session expired or invalid token. Please log in again.")
+
+    email = payload.get("email", "").lower()
+    user = database.get_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=401, detail="Administrator account not found.")
+    if user.get("status") == "suspended":
+        raise HTTPException(status_code=403, detail="Your account has been suspended.")
+
+    role = (user.get("role") or "").lower()
+    is_admin = (
+        "admin" in role
+        or "lead" in role
+        or email == "admin@phishshield.com"
+        or email == "neni112@gmail.com"
+    )
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Clearance Denied: Requires SOC Administrator privileges.")
+    return user
 
 app = FastAPI(
     title="PhishShield - Phishing Detection API",
@@ -120,8 +173,7 @@ def predict_url(req: PredictRequest):
 
     # Enforce account suspension
     if req.user_email:
-        users = _load_users()
-        u = users.get(req.user_email.strip().lower())
+        u = database.get_user_by_email(req.user_email.strip().lower())
         if u and u.get("status") == "suspended":
             raise HTTPException(
                 status_code=403,
@@ -135,11 +187,13 @@ def predict_url(req: PredictRequest):
     # Tier 1: Fast Allowlist
     if is_whitelisted(normalized_url):
         feats = extract_features(normalized_url)
-        # Log whitelisted legitimate scan to server-side scan history
+        # Log whitelisted legitimate scan to SQLite database
+        import datetime
+        scan_id = f"scan_{int(datetime.datetime.now().timestamp() * 1000)}"
+        scan_timestamp = datetime.datetime.now().isoformat() + "Z"
         try:
-            import datetime
             scan_log = {
-                "id": f"scan_{int(datetime.datetime.now().timestamp() * 1000)}",
+                "id": scan_id,
                 "url": normalized_url,
                 "prediction": "Legitimate",
                 "confidence": 99.9,
@@ -147,16 +201,20 @@ def predict_url(req: PredictRequest):
                 "risk_level": "Safe",
                 "tier": "Tier-1 Heuristic Whitelist",
                 "dns_status": "Active (Trusted CDN / Whitelist)",
-                "timestamp": datetime.datetime.now().isoformat() + "Z",
+                "timestamp": scan_timestamp,
                 "threat_count": 0,
                 "user_id": (req.user_id or "").strip(),
-                "user_email": (req.user_email or "").strip().lower()
+                "user_email": (req.user_email or "").strip().lower(),
+                "threat_reasons": [],
+                "features": feats
             }
-            _log_scan(scan_log)
+            database.insert_scan(scan_log)
         except Exception as e:
-            print(f"[-] Whitelist scan log error: {e}")
+            print(f"[-] Whitelist SQLite scan log error: {e}")
 
         return PredictResponse(
+            id=scan_id,
+            timestamp=scan_timestamp,
             url=normalized_url,
             prediction="Legitimate",
             confidence=99.9,
@@ -228,7 +286,7 @@ def predict_url(req: PredictRequest):
     if prediction == "Phishing" and not reasons:
         reasons.append("Structural lexical anomalies detected by Random Forest model")
 
-    # Log scan result to server-side JSON storage
+    # Log scan result to SQLite database
     import datetime
     scan_id = f"scan_{int(datetime.datetime.now().timestamp() * 1000)}"
     scan_timestamp = datetime.datetime.now().isoformat() + "Z"
@@ -245,11 +303,13 @@ def predict_url(req: PredictRequest):
             "timestamp": scan_timestamp,
             "threat_count": len(reasons),
             "user_id": (req.user_id or "").strip(),
-            "user_email": (req.user_email or "").strip().lower()
+            "user_email": (req.user_email or "").strip().lower(),
+            "threat_reasons": reasons,
+            "features": feats
         }
-        _log_scan(scan_log)
+        database.insert_scan(scan_log)
     except Exception as e:
-        print(f"[-] Non-critical scan log error: {e}")
+        print(f"[-] SQLite scan log error: {e}")
 
     return PredictResponse(
         id=scan_id,
@@ -283,154 +343,73 @@ def api_predict_url(req: PredictRequest):
     return predict_url(req)
 
 # ==========================================
-# AUTHENTICATION & SOC ANALYST ACCESS SYSTEM
+# SCAN HISTORY MANAGEMENT (SQLite BACKED)
 # ==========================================
-import hashlib
-import secrets
-
-DATA_DIR = os.path.join(BASE_DIR, "data")
-USERS_FILE = os.path.join(DATA_DIR, "users.json")
-SCANS_FILE = os.path.join(DATA_DIR, "scan_history.json")
-
-def _log_scan(scan_data: dict):
-    os.makedirs(DATA_DIR, exist_ok=True)
-    scans = []
-    if os.path.exists(SCANS_FILE):
-        try:
-            with open(SCANS_FILE, "r", encoding="utf-8") as f:
-                scans = json.load(f)
-        except Exception:
-            scans = []
-    scans.insert(0, scan_data)
-    scans = scans[:200]
-    _save_scans(scans)
-
-def _save_scans(scans: list):
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(SCANS_FILE, "w", encoding="utf-8") as f:
-        json.dump(scans, f, indent=2)
-
-def _load_scans() -> list:
-    if not os.path.exists(SCANS_FILE):
-        return []
-    try:
-        with open(SCANS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return []
 
 @app.get("/scans")
 @app.get("/api/scans")
-def get_scans(user_email: str | None = None):
-    all_scans = _load_scans()
-    if user_email:
-        clean = user_email.strip().lower()
-        return [s for s in all_scans if s.get("user_email", "").lower() == clean]
-    return all_scans
+def get_scans(user_email: str | None = None, limit: int = 500, offset: int = 0):
+    return database.get_scans(user_email=user_email, limit=limit, offset=offset)
 
 @app.delete("/scans/{scan_id}")
 @app.delete("/api/scans/{scan_id}")
 def delete_scan(scan_id: str, user_email: str | None = None):
-    all_scans = _load_scans()
-    clean_email = user_email.strip().lower() if user_email else None
-
-    # Find target scan
-    target_index = -1
-    for i, s in enumerate(all_scans):
-        sid = str(s.get("id", ""))
-        if sid == scan_id or sid.endswith(scan_id) or scan_id in sid:
-            target_index = i
-            break
-
-    if target_index == -1:
-        # Also try matching by composite key (url + timestamp)
-        for i, s in enumerate(all_scans):
-            composite = f"{s.get('url')}_{s.get('timestamp')}"
-            if composite == scan_id:
-                target_index = i
-                break
-
-    if target_index == -1:
+    scan = database.get_scan_by_id(scan_id)
+    if not scan:
         raise HTTPException(status_code=404, detail="Scan record not found.")
 
-    target = all_scans[target_index]
-
-    if clean_email:
-        target_email = (target.get("user_email") or "").lower()
-        users = _load_users()
-        user_record = users.get(clean_email, {})
-        is_admin = user_record.get("role") in ["SOC Administrator", "Lead SOC Analyst"]
+    if user_email:
+        clean_email = user_email.strip().lower()
+        target_email = (scan.get("user_email") or "").lower()
+        user_record = database.get_user_by_email(clean_email)
+        role = (user_record.get("role") or "").lower() if user_record else ""
+        is_admin = "admin" in role or "lead" in role or clean_email == "admin@phishshield.com"
         if target_email != clean_email and not is_admin:
             raise HTTPException(status_code=403, detail="Permission denied to delete this scan record.")
 
-    removed_item = all_scans.pop(target_index)
-    _save_scans(all_scans)
+    deleted = database.delete_scan(scan_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Scan record could not be deleted.")
+
     return {
         "success": True,
-        "message": "Scan record permanently deleted.",
-        "deleted_id": removed_item.get("id"),
-        "url": removed_item.get("url")
+        "message": "Scan record permanently deleted from SQLite database.",
+        "deleted_id": scan_id,
+        "url": scan.get("url")
     }
 
 @app.delete("/scans")
 @app.delete("/api/scans")
 def clear_scans(user_email: str | None = None):
-    all_scans = _load_scans()
     if not user_email:
         raise HTTPException(status_code=400, detail="user_email query parameter is required.")
-
     clean_email = user_email.strip().lower()
-    remaining = [s for s in all_scans if (s.get("user_email") or "").lower() != clean_email]
-    deleted_count = len(all_scans) - len(remaining)
-    _save_scans(remaining)
+    deleted_count = database.clear_user_scans(clean_email)
     return {
         "success": True,
         "message": f"Successfully purged {deleted_count} private scan records for {clean_email}.",
         "deleted_count": deleted_count
     }
 
-def _hash_password(password: str, salt: str) -> str:
-    return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
+class BulkDeleteRequest(BaseModel):
+    scan_ids: list[str]
+    user_email: str | None = None
 
-def _load_users() -> dict:
-    os.makedirs(DATA_DIR, exist_ok=True)
-    if not os.path.exists(USERS_FILE):
-        # Seed default demo analyst accounts for presentations & viva examiners
-        salt1 = secrets.token_hex(8)
-        salt2 = secrets.token_hex(8)
-        initial_users = {
-            "analyst@phishshield.com": {
-                "id": "usr_analyst_01",
-                "name": "Nensi Borad",
-                "email": "analyst@phishshield.com",
-                "role": "Lead SOC Analyst",
-                "salt": salt1,
-                "hashed_password": _hash_password("analyst123", salt1),
-                "created_at": "2026-01-01T00:00:00Z"
-            },
-            "admin@phishshield.com": {
-                "id": "usr_admin_01",
-                "name": "Security Operations Center Admin",
-                "email": "admin@phishshield.com",
-                "role": "Threat Intelligence Lead",
-                "salt": salt2,
-                "hashed_password": _hash_password("admin123", salt2),
-                "created_at": "2026-01-01T00:00:00Z"
-            }
-        }
-        with open(USERS_FILE, "w", encoding="utf-8") as f:
-            json.dump(initial_users, f, indent=2)
-        return initial_users
-    try:
-        with open(USERS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+@app.post("/scans/bulk-delete")
+@app.post("/api/scans/bulk-delete")
+def bulk_delete_scans_endpoint(req: BulkDeleteRequest):
+    if not req.scan_ids:
+        return {"success": True, "deleted_count": 0}
+    deleted = database.bulk_delete_scans(req.scan_ids, req.user_email)
+    return {
+        "success": True,
+        "message": f"Successfully deleted {deleted} scan records.",
+        "deleted_count": deleted
+    }
 
-def _save_users(users: dict):
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(users, f, indent=2)
+# ==========================================
+# AUTHENTICATION (JWT & PBKDF2-HMAC-SHA256)
+# ==========================================
 
 class RegisterRequest(BaseModel):
     name: str
@@ -457,36 +436,30 @@ def register_user(req: RegisterRequest):
     if len(password) < 6:
         raise HTTPException(status_code=400, detail="Security password must be at least 6 characters.")
 
-    users = _load_users()
-    if email in users:
+    existing = database.get_user_by_email(email)
+    if existing:
         raise HTTPException(status_code=400, detail="Analyst profile with this email already exists.")
 
-    salt = secrets.token_hex(8)
-    user_id = f"usr_{secrets.token_hex(4)}"
-    import datetime
-    new_user = {
-        "id": user_id,
-        "name": name,
-        "email": email,
-        "role": role,
-        "status": "active",
-        "salt": salt,
-        "hashed_password": _hash_password(password, salt),
-        "created_at": datetime.datetime.now().isoformat() + "Z"
-    }
-    users[email] = new_user
-    _save_users(users)
+    salt = security.generate_salt()
+    hashed = security.hash_password(password, salt)
+    user = database.create_user(name=name, email=email, role=role, salt=salt, hashed_password=hashed)
 
-    token = f"token_{secrets.token_hex(16)}"
+    token = security.create_access_token({
+        "sub": user["id"],
+        "email": user["email"],
+        "name": user["name"],
+        "role": user["role"]
+    })
+
     return {
         "success": True,
         "message": "Analyst account registered successfully",
         "user": {
-            "id": user_id,
-            "name": name,
-            "email": email,
-            "role": role,
-            "status": "active"
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "role": user["role"],
+            "status": user["status"]
         },
         "token": token
     }
@@ -500,9 +473,7 @@ def login_user(req: LoginRequest):
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password are required.")
 
-    users = _load_users()
-    user = users.get(email)
-
+    user = database.get_user_by_email(email)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid analyst credentials or account not found.")
 
@@ -510,15 +481,32 @@ def login_user(req: LoginRequest):
         raise HTTPException(status_code=403, detail="Account suspended by Administrator. Access denied.")
 
     salt = user.get("salt", "")
-    if _hash_password(password, salt) != user.get("hashed_password"):
+    stored_hash = user.get("hashed_password", "")
+    if not security.verify_password(password, salt, stored_hash):
         raise HTTPException(status_code=401, detail="Incorrect password. Access denied.")
 
+    # Seamless migration: if user still had old SHA-256 hash, upgrade to PBKDF2
+    if not stored_hash.startswith("pbkdf2_sha256$"):
+        new_salt = security.generate_salt()
+        new_hash = security.hash_password(password, new_salt)
+        database.update_user_password(email, new_salt, new_hash)
+
+    role = (user.get("role") or "").lower()
     is_admin = (
-        user.get("role") in ["SOC Administrator", "Admin", "Threat Intelligence Lead"]
+        "admin" in role
+        or "lead" in role
         or email == "admin@phishshield.com"
+        or email == "neni112@gmail.com"
     )
 
-    token = f"token_{secrets.token_hex(16)}"
+    token = security.create_access_token({
+        "sub": user["id"],
+        "email": user["email"],
+        "name": user["name"],
+        "role": user["role"],
+        "is_admin": is_admin
+    })
+
     return {
         "success": True,
         "message": "Authentication successful",
@@ -534,37 +522,59 @@ def login_user(req: LoginRequest):
     }
 
 # ==========================================
-# ADMIN PORTAL ENDPOINTS
+# USER PROFILE & SETTINGS (PROTECTED)
 # ==========================================
-@app.get("/api/admin/users")
-def get_admin_users():
-    users = _load_users()
-    all_scans = _load_scans()
-    
-    # Calculate telemetry per user
-    scan_counts = {}
-    threat_counts = {}
-    for s in all_scans:
-        em = (s.get("user_email") or "").strip().lower()
-        if em:
-            scan_counts[em] = scan_counts.get(em, 0) + 1
-            if s.get("prediction") == "Phishing":
-                threat_counts[em] = threat_counts.get(em, 0) + 1
 
-    sanitized = []
-    for email, u in users.items():
-        em = email.strip().lower()
-        sanitized.append({
-            "id": u.get("id"),
-            "name": u.get("name"),
-            "email": u.get("email"),
-            "role": u.get("role", "SOC Security Analyst"),
-            "status": u.get("status", "active"),
-            "created_at": u.get("created_at", "2026-01-01T00:00:00Z"),
-            "total_scans": scan_counts.get(em, 0),
-            "total_threats": threat_counts.get(em, 0)
-        })
-    return sanitized
+class ProfileUpdateRequest(BaseModel):
+    name: str
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+@app.get("/api/user/profile")
+def get_user_profile(user: dict = Depends(get_current_user)):
+    stats = database.get_user_scan_stats(user["email"])
+    return {
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "role": user["role"],
+            "status": user["status"],
+            "created_at": user["created_at"]
+        },
+        "stats": stats
+    }
+
+@app.put("/api/user/profile")
+def update_user_profile_endpoint(req: ProfileUpdateRequest, user: dict = Depends(get_current_user)):
+    new_name = req.name.strip()
+    if len(new_name) < 2:
+        raise HTTPException(status_code=400, detail="Analyst name must be at least 2 characters.")
+    database.update_user_profile(user["email"], new_name)
+    return {"success": True, "message": "Profile updated successfully.", "name": new_name}
+
+@app.put("/api/user/change-password")
+def change_user_password(req: ChangePasswordRequest, user: dict = Depends(get_current_user)):
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters.")
+
+    if not security.verify_password(req.current_password, user["salt"], user["hashed_password"]):
+        raise HTTPException(status_code=400, detail="Incorrect current security password.")
+
+    new_salt = security.generate_salt()
+    new_hash = security.hash_password(req.new_password, new_salt)
+    database.update_user_password(user["email"], new_salt, new_hash)
+    return {"success": True, "message": "Security credentials updated successfully."}
+
+# ==========================================
+# ADMIN PORTAL ENDPOINTS (ADMIN PROTECTED)
+# ==========================================
+
+@app.get("/api/admin/users")
+def get_admin_users(admin: dict = Depends(get_current_admin)):
+    return database.get_all_users_with_telemetry()
 
 class CreateUserRequest(BaseModel):
     name: str
@@ -574,7 +584,7 @@ class CreateUserRequest(BaseModel):
     status: str = "active"
 
 @app.post("/api/admin/users")
-def create_admin_user(req: CreateUserRequest):
+def create_admin_user(req: CreateUserRequest, admin: dict = Depends(get_current_admin)):
     email = req.email.strip().lower()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="A valid email address is required.")
@@ -583,105 +593,91 @@ def create_admin_user(req: CreateUserRequest):
     if len(req.password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
 
-    users = _load_users()
-    if email in users:
+    if database.get_user_by_email(email):
         raise HTTPException(status_code=400, detail="Analyst profile with this email already exists.")
 
-    salt = secrets.token_hex(8)
-    import datetime
-    user_id = f"usr_{secrets.token_hex(4)}"
-    new_user = {
-        "id": user_id,
-        "name": req.name.strip(),
-        "email": email,
-        "role": req.role.strip(),
-        "status": req.status.strip().lower(),
-        "salt": salt,
-        "hashed_password": _hash_password(req.password, salt),
-        "created_at": datetime.datetime.now().isoformat() + "Z"
-    }
-    users[email] = new_user
-    _save_users(users)
+    salt = security.generate_salt()
+    hashed = security.hash_password(req.password, salt)
+    new_user = database.create_user(
+        name=req.name.strip(),
+        email=email,
+        role=req.role.strip(),
+        salt=salt,
+        hashed_password=hashed,
+        status=req.status.strip().lower()
+    )
     return {
         "success": True,
         "message": f"Analyst profile {email} created successfully.",
-        "user": {
-            "id": user_id,
-            "name": req.name.strip(),
-            "email": email,
-            "role": req.role.strip(),
-            "status": req.status.strip().lower()
-        }
+        "user": new_user
     }
 
 class RoleUpdateRequest(BaseModel):
     role: str
 
 @app.put("/api/admin/users/{email}/role")
-def update_user_role(email: str, req: RoleUpdateRequest):
-    users = _load_users()
+def update_user_role(email: str, req: RoleUpdateRequest, admin: dict = Depends(get_current_admin)):
     clean_email = unquote(unquote(email)).strip().lower()
-    if clean_email not in users:
+    u = database.get_user_by_email(clean_email)
+    if not u:
         raise HTTPException(status_code=404, detail="Analyst profile not found.")
-    users[clean_email]["role"] = req.role.strip()
-    _save_users(users)
+    database.update_user_role(clean_email, req.role.strip())
     return {"success": True, "message": f"Privilege updated to {req.role}"}
 
 class StatusUpdateRequest(BaseModel):
     status: str
 
 @app.put("/api/admin/users/{email}/status")
-def update_user_status(email: str, req: StatusUpdateRequest):
-    users = _load_users()
+def update_user_status(email: str, req: StatusUpdateRequest, admin: dict = Depends(get_current_admin)):
     clean_email = unquote(unquote(email)).strip().lower()
-    if clean_email not in users:
-        raise HTTPException(status_code=404, detail="Analyst profile not found.")
     if clean_email == "admin@phishshield.com":
         raise HTTPException(status_code=400, detail="Cannot suspend root system administrator.")
+    u = database.get_user_by_email(clean_email)
+    if not u:
+        raise HTTPException(status_code=404, detail="Analyst profile not found.")
     new_status = req.status.strip().lower()
     if new_status not in ["active", "suspended"]:
         raise HTTPException(status_code=400, detail="Status must be 'active' or 'suspended'.")
-    users[clean_email]["status"] = new_status
-    _save_users(users)
+    database.update_user_status(clean_email, new_status)
     return {"success": True, "message": f"Account status set to {new_status}."}
 
 class PasswordResetRequest(BaseModel):
     new_password: str
 
 @app.put("/api/admin/users/{email}/password")
-def reset_user_password(email: str, req: PasswordResetRequest):
-    users = _load_users()
+def reset_user_password(email: str, req: PasswordResetRequest, admin: dict = Depends(get_current_admin)):
     clean_email = unquote(unquote(email)).strip().lower()
-    if clean_email not in users:
+    u = database.get_user_by_email(clean_email)
+    if not u:
         raise HTTPException(status_code=404, detail="Analyst profile not found.")
     if len(req.new_password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
-    salt = secrets.token_hex(8)
-    users[clean_email]["salt"] = salt
-    users[clean_email]["hashed_password"] = _hash_password(req.new_password, salt)
-    _save_users(users)
+    salt = security.generate_salt()
+    hashed = security.hash_password(req.new_password, salt)
+    database.update_user_password(clean_email, salt, hashed)
     return {"success": True, "message": f"Password for {clean_email} updated successfully."}
 
 @app.delete("/api/admin/users/{email}")
-def delete_user(email: str):
-    users = _load_users()
+def delete_user(email: str, admin: dict = Depends(get_current_admin)):
     clean_email = unquote(unquote(email)).strip().lower()
-    if clean_email not in users:
-        raise HTTPException(status_code=404, detail="Analyst profile not found.")
     if clean_email == "admin@phishshield.com":
         raise HTTPException(status_code=400, detail="Cannot delete root system administrator.")
-    del users[clean_email]
-    _save_users(users)
+    with database.get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM users WHERE LOWER(email) = LOWER(?)", (clean_email,))
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Analyst profile not found.")
     return {"success": True, "message": "Analyst profile permanently removed."}
 
 @app.get("/api/admin/scans")
-def get_admin_scans():
-    return _load_scans()
+def get_admin_scans(admin: dict = Depends(get_current_admin)):
+    return database.get_scans(limit=1000)
 
 @app.delete("/api/admin/scans")
-def clear_admin_scans():
-    _save_scans([])
-    return {"success": True, "message": "All global threat scan logs cleared."}
+def clear_admin_scans(admin: dict = Depends(get_current_admin)):
+    with database.get_db() as conn:
+        conn.execute("DELETE FROM scans")
+    return {"success": True, "message": "All global threat scan logs cleared from database."}
 
 
 # Serve Frontend SPA in Production if built
