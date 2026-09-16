@@ -63,9 +63,7 @@ const ScanHistory = () => {
         const rawStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
         const userStored = rawStored.filter((item) => {
           const itemEmail = (item.user_email || "").toLowerCase().trim();
-          if (currEmail && itemEmail === currEmail) return true;
-          if (currId && item.user_id === currId) return true;
-          return false;
+          return Boolean(currEmail && itemEmail === currEmail);
         });
         userStored.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
         setHistory(userStored);
@@ -394,16 +392,6 @@ const ScanHistory = () => {
             <span className="user-view-tag">
               <User size={14} /> Personal Scan Log: <strong>{currentUser?.email || "Analyst"}</strong>
             </span>
-            {isAdmin && (
-              <button
-                onClick={() => navigate("/admin")}
-                className="admin-view-tag"
-                style={{ cursor: "pointer", border: "1px dashed var(--cyan)", background: "rgba(14, 165, 233, 0.1)" }}
-                title="View All Users' Global Audit Logs in Admin Console"
-              >
-                <Shield size={13} /> View Global Multi-User Audit in Admin Portal →
-              </button>
-            )}
           </p>
         </div>
 

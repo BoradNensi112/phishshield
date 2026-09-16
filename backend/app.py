@@ -347,24 +347,55 @@ def api_predict_url(req: PredictRequest):
 
 @app.get("/scans")
 @app.get("/api/scans")
-def get_scans(user_email: str | None = None, limit: int = 500, offset: int = 0):
+def get_scans(
+    user_email: str | None = None,
+    limit: int = 500,
+    offset: int = 0,
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_bearer)
+):
+    caller_email = None
+    caller_is_admin = False
+
+    if credentials and credentials.credentials:
+        payload = security.decode_access_token(credentials.credentials)
+        if payload:
+            caller_email = (payload.get("email") or "").strip().lower()
+            caller_is_admin = bool(payload.get("is_admin"))
+
+    if not caller_is_admin:
+        # STRICT USER ISOLATION: A non-admin can NEVER see other users' scans or all scans.
+        target_email = caller_email if caller_email else (user_email.strip().lower() if user_email else None)
+        if not target_email:
+            return []
+        return database.get_scans(user_email=target_email, limit=limit, offset=offset)
+
+    # Authenticated Admin: can view all scans or filter by user_email
     return database.get_scans(user_email=user_email, limit=limit, offset=offset)
 
 @app.delete("/scans/{scan_id}")
 @app.delete("/api/scans/{scan_id}")
-def delete_scan(scan_id: str, user_email: str | None = None):
+def delete_scan(
+    scan_id: str,
+    user_email: str | None = None,
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_bearer)
+):
     scan = database.get_scan_by_id(scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan record not found.")
 
-    if user_email:
-        clean_email = user_email.strip().lower()
-        target_email = (scan.get("user_email") or "").lower()
-        user_record = database.get_user_by_email(clean_email)
-        role = (user_record.get("role") or "").lower() if user_record else ""
-        is_admin = "admin" in role or "lead" in role or clean_email == "admin@phishshield.com"
-        if target_email != clean_email and not is_admin:
-            raise HTTPException(status_code=403, detail="Permission denied to delete this scan record.")
+    caller_email = None
+    caller_is_admin = False
+    if credentials and credentials.credentials:
+        payload = security.decode_access_token(credentials.credentials)
+        if payload:
+            caller_email = (payload.get("email") or "").strip().lower()
+            caller_is_admin = bool(payload.get("is_admin"))
+
+    clean_email = caller_email or (user_email.strip().lower() if user_email else "")
+    target_email = (scan.get("user_email") or "").lower()
+
+    if not caller_is_admin and clean_email != target_email:
+        raise HTTPException(status_code=403, detail="Permission denied to delete this scan record.")
 
     deleted = database.delete_scan(scan_id)
     if not deleted:
@@ -379,14 +410,26 @@ def delete_scan(scan_id: str, user_email: str | None = None):
 
 @app.delete("/scans")
 @app.delete("/api/scans")
-def clear_scans(user_email: str | None = None):
-    if not user_email:
+def clear_scans(
+    user_email: str | None = None,
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_bearer)
+):
+    caller_email = None
+    caller_is_admin = False
+    if credentials and credentials.credentials:
+        payload = security.decode_access_token(credentials.credentials)
+        if payload:
+            caller_email = (payload.get("email") or "").strip().lower()
+            caller_is_admin = bool(payload.get("is_admin"))
+
+    target_email = caller_email if (caller_email and not caller_is_admin) else (user_email.strip().lower() if user_email else "")
+    if not target_email:
         raise HTTPException(status_code=400, detail="user_email query parameter is required.")
-    clean_email = user_email.strip().lower()
-    deleted_count = database.clear_user_scans(clean_email)
+
+    deleted_count = database.clear_user_scans(target_email)
     return {
         "success": True,
-        "message": f"Successfully purged {deleted_count} private scan records for {clean_email}.",
+        "message": f"Successfully purged {deleted_count} private scan records for {target_email}.",
         "deleted_count": deleted_count
     }
 
@@ -396,10 +439,23 @@ class BulkDeleteRequest(BaseModel):
 
 @app.post("/scans/bulk-delete")
 @app.post("/api/scans/bulk-delete")
-def bulk_delete_scans_endpoint(req: BulkDeleteRequest):
+def bulk_delete_scans_endpoint(
+    req: BulkDeleteRequest,
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_bearer)
+):
     if not req.scan_ids:
         return {"success": True, "deleted_count": 0}
-    deleted = database.bulk_delete_scans(req.scan_ids, req.user_email)
+
+    caller_email = None
+    caller_is_admin = False
+    if credentials and credentials.credentials:
+        payload = security.decode_access_token(credentials.credentials)
+        if payload:
+            caller_email = (payload.get("email") or "").strip().lower()
+            caller_is_admin = bool(payload.get("is_admin"))
+
+    effective_email = caller_email if (caller_email and not caller_is_admin) else req.user_email
+    deleted = database.bulk_delete_scans(req.scan_ids, effective_email)
     return {
         "success": True,
         "message": f"Successfully deleted {deleted} scan records.",

@@ -6,11 +6,32 @@ const AuthContext = createContext();
 const STORAGE_KEY = "phishshield_auth_user";
 const LOCAL_USERS_KEY = "phishshield_registered_users";
 
+// Strict Sanitizer: Under NO circumstances can any user other than admin@phishshield.com be admin
+const sanitizeUser = (userObj) => {
+  if (!userObj) return null;
+  const clone = { ...userObj };
+  const cleanEmail = (clone.email || "").toLowerCase().trim();
+  if (cleanEmail !== "admin@phishshield.com") {
+    clone.is_admin = false;
+    if (clone.role === "SOC Administrator" || clone.role === "Admin") {
+      clone.role = "SOC Security Analyst";
+    }
+  }
+  return clone;
+};
+
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : null;
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      const sanitized = sanitizeUser(parsed);
+      // Clean up local storage immediately to eliminate stale admin cookies
+      if (sanitized) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+      }
+      return sanitized;
     } catch {
       return null;
     }
@@ -21,9 +42,11 @@ export const AuthProvider = ({ children }) => {
   // Sync state to localStorage whenever it changes
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+      const sanitized = sanitizeUser(currentUser);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
     } else {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("phishshield_token");
     }
   }, [currentUser]);
 
@@ -64,9 +87,13 @@ export const AuthProvider = ({ children }) => {
         if (res.token) {
           localStorage.setItem("phishshield_token", res.token);
         }
-        setCurrentUser(res.user);
+        const sanitized = sanitizeUser(res.user);
+        if (roleMode !== "admin") {
+          sanitized.is_admin = false;
+        }
+        setCurrentUser(sanitized);
         setLoading(false);
-        return { success: true, user: res.user };
+        return { success: true, user: sanitized };
       }
     } catch (err) {
       setLoading(false);
@@ -203,15 +230,14 @@ export const AuthProvider = ({ children }) => {
   const refreshCurrentUser = async () => {
     if (!currentUser?.email) return;
     try {
-      const all = await apiService.getAdminUsers();
-      const me = all.find(u => u.email?.toLowerCase() === currentUser.email?.toLowerCase());
-      if (me) {
-        if (me.status === "suspended") {
+      const data = await apiService.getUserProfile();
+      if (data && data.user) {
+        if (data.user.status === "suspended") {
           logout();
           return;
         }
-        if (me.role !== currentUser.role) {
-          setCurrentUser(prev => ({ ...prev, role: me.role }));
+        if (data.user.role !== currentUser.role) {
+          setCurrentUser(prev => sanitizeUser({ ...prev, role: data.user.role }));
         }
       }
     } catch {
@@ -222,10 +248,14 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem("phishshield_token");
   };
 
+  // STRICT ADMIN RULE: ONLY admin@phishshield.com with authenticated is_admin=true can EVER be admin
   const isAdmin = Boolean(
-    currentUser && currentUser.is_admin === true
+    currentUser &&
+    currentUser.email?.toLowerCase().trim() === "admin@phishshield.com" &&
+    currentUser.is_admin === true
   );
 
   return (

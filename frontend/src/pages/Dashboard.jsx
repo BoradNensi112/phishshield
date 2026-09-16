@@ -57,9 +57,7 @@ const Dashboard = () => {
         const rawStored = JSON.parse(localStorage.getItem("phishshield_history") || "[]");
         const userStored = rawStored.filter((item) => {
           const itemEmail = (item.user_email || "").toLowerCase().trim();
-          if (currEmail && itemEmail === currEmail) return true;
-          if (currId && item.user_id === currId) return true;
-          return false;
+          return Boolean(currEmail && itemEmail === currEmail);
         });
         userStored.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
         setHistory(userStored);
@@ -126,12 +124,6 @@ const Dashboard = () => {
         </div>
 
         <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-          {isAdmin && (
-            <Link to="/admin" className="cyber-btn-secondary btn-sm" style={{ borderColor: "rgba(0, 240, 255, 0.4)" }}>
-              <ShieldAlert size={15} className="cyan-text" />
-              <span>Org Admin Console</span>
-            </Link>
-          )}
           <button onClick={loadData} className="cyber-btn-secondary btn-sm" title="Refresh Dashboard">
             <RefreshCw size={16} />
             <span>Refresh</span>
